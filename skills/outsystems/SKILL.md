@@ -119,8 +119,8 @@ Mentor is a multi-turn conversation backed by a server-side session that holds t
 3. Synthesize into the user-facing explanation.
 
 **Edit an existing app and ship it:**
-1. First turn: `mentor_start {app_key, prompt: "Add a due date field to Task"}` returns a `runId`. Poll `mentor_get_run {runId, cursor}` until terminal; pull `mentor_session_id` + `mentor_session_token` out of `result`.
-2. Optional follow-up turns: `mentor_start {mentor_session_id, mentor_session_token, prompt: "..."}` and poll the same way. Each terminal result returns a fresh token; use the newest one next.
+1. First turn: `mentor_start {app_key, app_type, prompt: "Add a due date field to Task"}` returns a `runId`. Pass `app_type` (read from `app_info.assetType` — one of `CrossDevice`, `ReactiveLibrary`, `AIAgent`) so the agent picks the right segmentation. Poll `mentor_get_run {runId, cursor}` until terminal; pull `mentor_session_id` + `mentor_session_token` out of `result`.
+2. Optional follow-up turns: `mentor_start {mentor_session_id, mentor_session_token, prompt: "..."}` and poll the same way. `app_type` is persisted in the session token — don't re-pass unless you're correcting it. Each terminal result returns a fresh token; use the newest one next.
 3. `publish_start {mentor_session_id, mentor_session_token, env_key}` returns `publication_id`.
 4. Poll `publish_status {publication_id}` until terminal. Use `publish_logs {pub_key: publication_id}` for messages on failure.
 
