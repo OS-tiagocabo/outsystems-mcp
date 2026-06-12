@@ -22,7 +22,7 @@ OAuth-protected. The server exposes two MCP tools the agent drives directly. You
 
 Tool catalog and per-tool semantics live in the MCP server's `tools/list`; treat each tool's `description` + `inputSchema` as the source of truth, since defaults can change server-side. Tools group as:
 
-- **Apps**: `app_list`, `app_info`, `app_refs`
+- **Apps**: `app_list`, `app_info`, `app_refs`, `app_logs`
 - **Context Service** (seven typed lookups): `context_entities`, `context_actions`, `context_screens`, `context_structures`, `context_roles`, `context_themes`, `context_connections`
 - **Mentor** (server-side OML editing): `mentor_start`, `mentor_get_run`, `mentor_cancel`
 - **Publish**: `publish_start`, `publish_status`, `publish_logs`
@@ -38,6 +38,7 @@ Cross-tool behaviors not expressible in a single per-tool description:
 - **`publish_start` — `app_key` comes from the `mentor_session_token` claims, not arguments.** Required params: `mentor_session_id`, `mentor_session_token`, `env_key`. An explicit `app_key` is ignored.
 - **`extlib_upload` — 50 MB decoded cap (~67 MB encoded `zip_b64`); per-replica concurrency gating.** Pre-flight rejects oversize payloads; concurrent uploads queue per replica rather than reject.
 - **`context_*` — `owned_only` defaults to `true` when `app` is set, `false` tenant-wide.** Pass `owned_only: false` with `app` to keep rows inherited from referenced libraries (OutSystemsUI, Charts, etc.).
+- **`app_logs` — needs an ODC portal session, not the harness bearer.** The portal log screenservices reject the identity bearer (401); the server supplies a portal `Cookie` via `ODC_MONITORING_COOKIE`. Works on the stdio CLI today; hosted support is pending server-minted portal sessions.
 
 ## Rules
 
