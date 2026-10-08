@@ -114,32 +114,30 @@ python3 "<skill>/scripts/build.py" build-prompt --spec "<work>/spec.md"
 
 The output is the Mentor turn: the whole spec between `<spec>` and `</spec>`, then the guardrails, among them:
 - *"Respect the role-per-screen assignments in Section 4 EXACTLY. Do NOT default screens to anonymous/public access."*
-- *"Bootstrap the sample data with a Timer that runs when the app is published"*: one `Bootstrap<Entity>` action per entity that inserts only when the entity is empty, one generated `Create<Entity>` call per row, all called by `BootstrapData`, which a Timer runs when the app is published; no SQL inserts, literal dates.
+- *"Bootstrap the sample data with a Timer that runs when the app is published"*: a `Bootstrap<Entity>` action for each non-static entity that inserts only when the entity is empty, one generated `Create<Entity>` call per row, all called by `BootstrapData` from a Timer named `BootstrapTimer`; each action logs `inserted N rows` or `skipped, N present`; no SQL inserts, literal dates. Skipped when the spec says to skip sample data (Section 8 or 10).
 - *"Do NOT publish the app in this turn."*
 
-Send it as **one Mentor turn** on the session, unchanged: don't rewrite or drop the guardrails, and don't split the spec over several turns.
+Send it as **one Mentor turn** on the session, unchanged: don't rewrite or drop the guardrails, and don't split the spec into several turns up front.
 
-> **Build order.** The main `outsystems` skill publishes the data model before asking for screens. This skill is an exception on purpose: the spec is agreed and validated up front (Steps 1–3), so Mentor builds the data model, the sample-data timer and the screens together in one turn, and the session is published once (Step 6). If the turn fails, retry it on the same session (below) before publishing anything.
+> **Build order, and its trade-off.** The main `outsystems` skill publishes the data model before asking for screens. This skill is an exception on purpose: the spec is agreed and validated up front (Steps 1–3), so Mentor builds the data model, the sample-data timer and the screens together in one turn, and the session is published once (Step 6). The cost is durability: nothing is saved until that publish, and a new app can't be found in the catalog before it, so if the session ends first (the server's idle limit while a question waits, or a turn that can't be recovered) the whole build is lost. So ask the publish question as soon as the turn has landed, and say in it that the session ends after the idle limit.
 
 Poll the run to terminal and read its completion signals **as the main `outsystems` skill describes**; save the terminal result to `<work>/mentor-result.json`. Then render the build report, which also records whether the turn landed:
 
 ```bash
-python3 "<skill>/scripts/build.py" render-report --spec "<work>/spec.md" \
-  --result "<work>/mentor-result.json" \
-  --app-key "<app_key>" --output "<work>/build-report.md"
+python3 "<skill>/scripts/build.py" render-report --spec "<work>/spec.md" --result "<work>/mentor-result.json" --app-key "<app_key>" --output "<work>/build-report.md"
 ```
 
-It accepts a saved terminal response or the list of pages read from the start of the run, and shows each turn's status, whether it **landed** (the main skill's completion signals: status, turn error, validation errors, whether the change was applied) and Mentor's summary. **Exit 1 means the last turn didn't land:** don't publish it as built. Each turn keeps its own Landed line, so a fix turn that landed clears an earlier failure.
+It accepts a saved terminal response, the list of pages read from the start of the run, or either one as the harness saved it, and shows each turn's status, whether it **landed** (the main skill's completion signals: status, turn error, validation errors, whether the change was applied) and Mentor's summary. **Exit 1 means the last turn didn't land:** don't publish it as built. Each turn keeps its own Landed line, so a fix turn that landed clears an earlier failure.
 
 **Check whether Mentor published on its own.** The prompt forbids it, but a build turn can still end in a publish. Look in the turn's result and events for a publication key or a "published" message. If it did publish, don't publish again: tell the user Mentor published without asking, follow that publication to terminal, and carry on from Step 7.
 
 If the turn didn't land, send one targeted fix turn on the same session (the problems with concrete values, ending with "Do NOT publish the app in this turn"), save its result next to the first one, and render the report again with one `--result` per turn, in order.
 
-> **Don't cancel a turn whose work you want:** its in-flight edits may not land. If a turn fails or times out, retry in the same session as the main `outsystems` skill describes (raise the turn-time ceiling where the catalog offers one, otherwise narrow the prompt).
+> **Don't cancel a turn whose work you want:** its in-flight edits may not land. If a turn fails or times out, retry in the same session as the main `outsystems` skill describes: raise the turn-time ceiling where the catalog offers one; otherwise send a follow-up turn that asks Mentor to finish only what is still missing from the spec, reusing what it already built (the prompt's rules forbid a second set of bootstrap actions or timer).
 
 ### Step 6: Publish
 
-Publishing is a tenant write. **Before publishing**, restate what will be published ("publish app X to its development environment") and wait for explicit confirmation. Then:
+Publishing is a tenant write. **Before publishing**, restate what will be published ("publish app X to its development environment") and wait for explicit confirmation; ask as soon as the turn has landed, and say that the session ends after the server's idle limit with everything unpublished (Step 5). Then:
 
 - **Publish the session** through the publish route the catalog offers (never by app key; main `outsystems` skill), with a short publish note.
 - **If the publish is refused**, handle it as the main `outsystems` skill describes.
@@ -154,14 +152,15 @@ When the publish has landed:
 
 - Fetch the runtime URL from the environment's app info, as the main `outsystems` skill describes, and give the user the `url` as a link.
 - **Access per screen:** compare each screen's roles with section 4, using the screens and roles context lookups for the app.
-- **Sample data:** the bootstrap timer runs right after the publish. Check the app's runtime logs (search for "Bootstrap") for the timer's "executed successfully" line, then spot-check that the screens show data; an error in the logs shows why a table stayed empty.
+- **Sample data** (skip when the spec says to skip it): `BootstrapTimer` runs right after the publish. Search the app's runtime logs for "Bootstrap" and expect one line per non-static entity, `Bootstrap<Entity>: inserted N rows`. The timer runs asynchronously, so if nothing shows yet, wait briefly and check once more. If a line shows an error, or there is still nothing, send one fix turn on this app (on the same session if it's still open, otherwise a new session with the app loaded), confirm and publish it, and check again; if it still fails, say so in the report.
 - Release the session once its work is published, as the main `outsystems` skill describes.
 
-### Step 8: Report to the user (3–5 lines)
+### Step 8: Report to the user (4–6 lines)
 
 - App name, `app_key` and revision, with the runtime URL as a link
 - What was built (entity, role and screen counts) and anything Mentor skipped or left as a manual step
 - The Step 7 checks: access per screen, sample data, and anything still wrong
+- **Sample data:** that the app now contains `BootstrapData` and `BootstrapTimer`, which runs on every publish, deployment and automatic patch in whichever stage the app is in and refills any empty sample-data table. To keep those tables empty, the timer has to be removed first: offer to do it in one Mentor turn on this app, confirmed and published like any other change
 - The working folder and `build-report.md`
 - If something is unpublished: the `sessionId`, and that it must be published before the session goes idle
 

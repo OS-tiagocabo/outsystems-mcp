@@ -17,7 +17,7 @@
 - **Engineer**: creates and edits their own tasks; views all team tasks; cannot delete tasks; cannot reassign other engineers' tasks.
 - **EngineeringManager**: full access — creates, edits, deletes, reassigns any task across the team.
 
-(No anonymous access — this is internal-only.)
+(Internal-only: no anonymous access to app data. Only the Login screen is public.)
 
 ---
 

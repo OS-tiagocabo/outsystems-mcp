@@ -107,25 +107,35 @@ MENTOR_RULES = """\
    or auto-detect: type mismatches cause build failures downstream.
 
 7. **Bootstrap the sample data with a Timer that runs when the app is
-   published**, unless Section 8 excludes sample data. Give each non-static
-   entity a server action named Bootstrap<Entity> that counts the entity's
-   rows and inserts only when it is empty, with one generated
-   Create<Entity> call per row; call them all, parents before children,
-   from one server action named BootstrapData, and run BootstrapData from a
-   Timer scheduled to run when the app is published. An action that nothing
-   runs never seeds anything. Do NOT seed with SQL or Advanced SQL INSERT
-   statements: they have failed at runtime on ODC and left every table
-   empty. Use realistic values, and seed any value the spec gives exactly as
-   given; a date is a literal date, never CurrDate() or CurrDateTime().
-   Static entities carry their records in the entity itself.
+   published**, unless the spec says to skip sample data (Section 8 or 10).
+   Give each non-static entity a server action named Bootstrap<Entity> that
+   counts the entity's rows and inserts only when it is empty, with one
+   generated Create<Entity> call per row; call them all, parents before
+   children, from one server action named BootstrapData, and run
+   BootstrapData from a Timer named BootstrapTimer, scheduled to run when
+   the app is published. An action that nothing runs never seeds anything.
+   Each Bootstrap<Entity> logs one line: "Bootstrap<Entity>: inserted N
+   rows" or "Bootstrap<Entity>: skipped, N present". Do NOT seed with SQL or
+   Advanced SQL INSERT statements: they have failed at runtime on ODC and
+   left every table empty. Use realistic values, and seed any value the
+   spec gives exactly as given; a date is a literal date, never CurrDate()
+   or CurrDateTime(). Static entities carry their records in the entity
+   itself.
 
-8. **Bind every table, list and count to an aggregate over the entities**,
-   never to an empty or unset source.
+8. **Required fields use the input's Mandatory property.** Set it on every
+   input for a required attribute; never put a literal `*` in the label.
 
-9. **Do NOT publish the app in this turn.** Publishing is done separately,
-   after the user confirms.
+9. **If an element the spec names already exists, update it** instead of
+   creating a second one. Never create a second Bootstrap<Entity>,
+   BootstrapData or BootstrapTimer.
 
-10. **At the end, summarize:** what was created (counts of entities, roles,
+10. **Bind every table, list and count to an aggregate over the entities**,
+    never to an empty or unset source.
+
+11. **Do NOT publish the app in this turn.** Publishing is done separately,
+    after the user confirms.
+
+12. **At the end, summarize:** what was created (counts of entities, roles,
     actions, screens), what was skipped (and why), and any manual steps the
     user needs to take."""
 
@@ -138,13 +148,25 @@ CLOSING_LINE = (
 # ------------------------------------------------------------------ helpers
 
 
-def _read_json_object(path: Path, what: str):
-    """Load a JSON object from `path`, or print one line and return None."""
+def _read_text(path: Path, what: str):
+    """Read a UTF-8 text file (a byte-order mark is dropped), or print one line and return None."""
     if not path.exists():
         print(f"{what} not found: {path}", file=sys.stderr)
         return None
     try:
-        data = json.loads(path.read_text("utf-8"))
+        return path.read_bytes().decode("utf-8-sig")
+    except UnicodeDecodeError:
+        print(f"{what} is not UTF-8 text: {path}; save it as UTF-8 and try again", file=sys.stderr)
+        return None
+
+
+def _read_json_object(path: Path, what: str):
+    """Load JSON from `path`, or print one line and return None."""
+    text = _read_text(path, what)
+    if text is None:
+        return None
+    try:
+        data = json.loads(text)
     except (json.JSONDecodeError, ValueError) as exc:
         print(f"{what} is not valid JSON: {path}: {exc}", file=sys.stderr)
         return None
@@ -166,10 +188,10 @@ def _sections(text: str) -> dict[str, tuple[str, str]]:
 
 def cmd_list_questions(args: argparse.Namespace) -> int:
     """Emit the interview questions JSON to stdout."""
-    if not QUESTIONS_PATH.exists():
-        print(f"questions file missing: {QUESTIONS_PATH}", file=sys.stderr)
+    text = _read_text(QUESTIONS_PATH, "questions file")
+    if text is None:
         return 1
-    sys.stdout.write(QUESTIONS_PATH.read_text("utf-8"))
+    sys.stdout.write(text)
     return 0
 
 
@@ -349,10 +371,9 @@ def _screen_roles(cell: str, known: set[str]) -> list[str]:
 def cmd_validate_spec(args: argparse.Namespace) -> int:
     """Check a spec before Mentor builds from it. Errors fail (exit 1); warnings are printed only."""
     spec_path = Path(args.spec)
-    if not spec_path.exists():
-        print(f"spec not found: {spec_path}", file=sys.stderr)
+    text = _read_text(spec_path, "spec")
+    if text is None:
         return 1
-    text = spec_path.read_text("utf-8")
     sections = {num: body for num, (_, body) in _sections(text).items()}
     errors: list[str] = []
     warnings: list[str] = []
@@ -438,10 +459,9 @@ def cmd_validate_spec(args: argparse.Namespace) -> int:
 def cmd_show_spec(args: argparse.Namespace) -> int:
     """Pretty-print a spec to stdout for user confirmation."""
     spec_path = Path(args.spec)
-    if not spec_path.exists():
-        print(f"spec not found: {spec_path}", file=sys.stderr)
+    text = _read_text(spec_path, "spec")
+    if text is None:
         return 1
-    text = spec_path.read_text("utf-8")
     print("=" * 70)
     print(f" SPEC PREVIEW — {spec_path.name}")
     print("=" * 70)
@@ -460,10 +480,9 @@ def cmd_show_spec(args: argparse.Namespace) -> int:
 def cmd_build_prompt(args: argparse.Namespace) -> int:
     """Wrap the spec in the Mentor prompt with the guardrails."""
     spec_path = Path(args.spec)
-    if not spec_path.exists():
-        print(f"spec not found: {spec_path}", file=sys.stderr)
+    spec_text = _read_text(spec_path, "spec")
+    if spec_text is None:
         return 1
-    spec_text = spec_path.read_text("utf-8")
     parts = [
         PROMPT_INTRO,
         "",
@@ -523,15 +542,42 @@ def _extract_text(events: list) -> str:
     return "".join(chunks).strip()
 
 
+def _pages(raw) -> list[dict]:
+    """The run pages in a saved result. A harness may save an MCP result as its
+    content blocks (`[{"type": "text", "text": "<json>"}]`) or with a
+    `structuredContent` copy; both are unwrapped to the run response inside."""
+    out: list[dict] = []
+
+    def add(item) -> None:
+        if isinstance(item, list):
+            for x in item:
+                add(x)
+        elif isinstance(item, dict):
+            if isinstance(item.get("structuredContent"), dict):
+                add(item["structuredContent"])
+            elif item.get("type") == "text" and isinstance(item.get("text"), str):
+                try:
+                    add(json.loads(item["text"]))
+                except (json.JSONDecodeError, ValueError):
+                    pass
+            elif isinstance(item.get("content"), list) and "status" not in item:
+                add(item["content"])
+            else:
+                out.append(item)
+
+    add(raw)
+    return out
+
+
 def _read_run(raw) -> dict:
-    """Normalise one saved run result: a terminal response, or a list of the
-    pages read from cursor 0 (status from the last page, events from all)."""
-    pages = raw if isinstance(raw, list) else [raw]
-    pages = [p for p in pages if isinstance(p, dict)]
+    """Normalise one saved run result: a terminal response, the list of pages
+    read from cursor 0, or either as the harness saved it. The status, result
+    and errors come from the last page that has a status; events from all."""
+    pages = _pages(raw)
     if not pages:
         return {"run_id": "", "status": "unknown", "result": {}, "validation": {},
                 "events": [], "summary": "", "error": ""}
-    last = pages[-1]
+    last = next((p for p in reversed(pages) if p.get("status")), pages[-1])
     events: list = []
     for p in pages:
         events.extend(p.get("events") or [])
@@ -553,6 +599,21 @@ def _read_run(raw) -> dict:
     }
 
 
+def _error_count(validation: dict):
+    """The validation error count as an int, or None when the result gives none.
+    Accepts a number, a numeric string, or a list of errors."""
+    raw = validation.get("errorCount", validation.get("error_count"))
+    if isinstance(raw, list):
+        return len(raw)
+    if raw is not None:
+        try:
+            return int(raw)
+        except (TypeError, ValueError):
+            return None
+    errors = validation.get("errors")
+    return len(errors) if isinstance(errors, list) else None
+
+
 def _landed(run: dict) -> tuple[bool, str]:
     """Whether the turn's work landed, from the terminal completion signals,
     as the main skill reads them: `succeeded` only means the turn ended."""
@@ -560,11 +621,13 @@ def _landed(run: dict) -> tuple[bool, str]:
         return False, f"status is {run['status']}"
     if run["error"]:
         return False, f"turn error: {run['error']}"
-    errors = run["validation"].get("errorCount", run["validation"].get("error_count"))
-    if isinstance(errors, int) and errors > 0:
+    errors = _error_count(run["validation"])
+    if errors:
         return False, f"{errors} validation error(s)"
     result = run["result"]
     applied = result.get("changeApplied", result.get("change_applied", result.get("applied")))
+    if isinstance(applied, str):
+        applied = applied.strip().lower() not in ("false", "0", "no")
     if applied is False:
         return False, "the change was not applied"
     return True, "succeeded, no validation errors"
@@ -575,8 +638,8 @@ def cmd_render_report(args: argparse.Namespace) -> int:
     Every turn gets a Landed line; exit 1 when the last turn didn't land (the
     report is still written), so a fix turn that landed clears an earlier failure."""
     spec_path = Path(args.spec)
-    if not spec_path.exists():
-        print(f"spec not found: {spec_path}", file=sys.stderr)
+    spec_text = _read_text(spec_path, "spec")
+    if spec_text is None:
         return 1
     runs = []
     for i, result_path in enumerate(args.result):
@@ -591,7 +654,6 @@ def cmd_render_report(args: argparse.Namespace) -> int:
                  else "build" if i == 0 else f"fix {i}")
         runs.append((label, Path(result_path), _read_run(raw)))
 
-    spec_text = spec_path.read_text("utf-8")
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
