@@ -1,6 +1,6 @@
 ---
 name: outsystems-spec-driven-build
-description: '[Beta] Drive ODC Mentor to bootstrap an OutSystems app from a TEXT-ONLY structured spec — no design source needed. For Figma/image/HTML inputs, use `outsystems-design-to-app` instead. EXPERIMENTAL — Mentor is built for in-flow edits, so treat results as draft scaffolds for review, NOT ship-ready apps. A spec check first confirms every screen names a role the spec defines and that entities are listed, and warns when relationships or integrations are not stated; then it drives Mentor in one turn with guardrails against its known mistakes. Three entry modes — your own markdown spec file, an interview, or clone from an example template. Use when the user asks to "build a new app from spec", "generate an app from requirements", "have Mentor build [app] from this spec", "build an app from this written description", "write a spec for a new app and build it", or similar spec- or requirements-driven greenfield asks with NO design artifact.'
+description: '[Beta] Drive ODC Mentor to bootstrap an OutSystems app from a TEXT-ONLY structured spec — no design source needed. For Figma/image/HTML inputs, use `outsystems-design-to-app` instead. EXPERIMENTAL — Mentor is built for in-flow edits, so treat results as draft scaffolds for review, NOT ship-ready apps. A spec check first confirms every screen names a role the spec defines and that entities are listed, and warns when relationships or integrations are not stated; then it drives Mentor in two parts, data model then screens, each published, with guardrails against its known mistakes. Three entry modes — your own markdown spec file, an interview, or clone from an example template. Use when the user asks to "build a new app from spec", "generate an app from requirements", "have Mentor build [app] from this spec", "build an app from this written description", "write a spec for a new app and build it", or similar spec- or requirements-driven greenfield asks with NO design artifact.'
 license: MIT
 compatibility: Ships for Claude Code, Cursor and Kiro. Needs a shell with Python 3.8+ (standard library only; on Windows the interpreter may be `python` or `py -3`), so Claude Desktop's Chat tab, which has no shell, can't run it. Requires the `outsystems` MCP server connected and authenticated, with the session-based Mentor tools available, and builds on the main `outsystems` skill for session, polling and publish rules. Mentor must be enabled on the tenant.
 metadata:
@@ -35,7 +35,7 @@ Generate a new OutSystems app from a structured, text-only spec via ODC Mentor. 
 
 Keep the build's files in a `spec-driven-build/<APP_NAME>/` folder inside the user's current workspace (create it with the file-write tool), not directly in the home folder or a configuration folder. Below, `<work>` is that folder and `<skill>` is this skill's directory.
 
-- Contents: `spec.md`, `answers.json` (interview mode), `mentor-result.json`, `build-report.md`.
+- Contents: `spec.md`, `answers.json` (interview mode), `result-data.json` and `result-screens.json` (plus one file per fix turn), `build-report.md`.
 - Retention: the user owns it; nothing expires.
 - A Mentor run's terminal events can be large (50–500 KB). If a large result arrives inline, save it to `<work>` and re-read only what you need; if the harness already saved it to disk, pass that path on.
 
@@ -88,9 +88,9 @@ Before firing Mentor, **show the user the final spec** and get explicit confirma
 python3 "<skill>/scripts/build.py" show-spec --spec "<work>/spec.md"
 ```
 
-Display the output. Ask the user a yes/no and wait for an explicit answer: *"Ready to fire Mentor with this spec?"* Name the target app in the question: a new Web app named X, created from the standard template in portfolio Y, or the existing app X.
+Display the output. Ask the user a yes/no and wait for an explicit answer: *"Ready to fire Mentor with this spec?"* Name the target app in the question (a new Web app named X, created from the standard template in portfolio Y, or the existing app X) and say the build runs in two parts, the data model first and then the screens, each followed by a publish.
 
-This go/no-go covers the Mentor edits only. **Each tenant write gets its own confirmation** (main `outsystems` skill): creating the app (Step 4) and the publish (Step 6). Don't offer to approve those writes in advance.
+This go/no-go covers the Mentor edits only. **Each tenant write gets its own confirmation** (main `outsystems` skill): creating the app (Step 4) and each publish (Steps 5 and 6). Don't offer to approve those writes in advance.
 
 > Use whatever confirmation affordance your harness provides (a question tool, or asking inline). The gate is the confirmation itself, not any particular tool.
 
@@ -104,62 +104,76 @@ The live tool catalog decides which calls do each step; field names below follow
   - **Portfolio:** use the portfolio the user names, or the one their existing apps belong to (the detailed app listing shows each app's portfolio key), and state it in the creation question; never guess one. If the create call is refused, read the error and supply what it asks for.
 - **Fallback** when creation fails: ask the user to create the app in ODC Studio and publish it once there, then find it by name and load it.
 
-Use **this one session for the build and the publish** (main `outsystems` skill). Its idle limit applies while you wait on the user.
+Use **this one session for both parts and their publishes** (main `outsystems` skill). Its idle limit applies while you wait on the user.
 
-### Step 5: Drive Mentor with the guardrails
+### Step 5: Part 1, the data model
+
+The build follows the main `outsystems` skill's order: the data model is built and published first, so the screens are built on a saved revision and a failure in the screens part costs only that part.
 
 ```bash
-python3 "<skill>/scripts/build.py" build-prompt --spec "<work>/spec.md"
+python3 "<skill>/scripts/build.py" build-prompt --spec "<work>/spec.md" --part data
 ```
 
-The output is the Mentor turn: the whole spec between `<spec>` and `</spec>`, then the guardrails, among them:
-- *"Respect the role-per-screen assignments in Section 4 EXACTLY. Do NOT default screens to anonymous/public access."*
+The output is the Mentor turn for part 1: the spec's data sections (overview, roles, data model, integrations, out of scope, notes) between `<spec>` and `</spec>`, then the data guardrails, among them:
+- *"Build only the data part in this turn. Do NOT create screens, screen logic, navigation or menu entries yet."*
 - *"Bootstrap the sample data with a Timer that runs when the app is published"*: a `Bootstrap<Entity>` action for each non-static entity that inserts only when the entity is empty, one generated `Create<Entity>` call per row, all called by `BootstrapData` from a Timer named `BootstrapTimer`; each action logs `inserted N rows` or `skipped, N present`; no SQL inserts, literal dates. Skipped when the spec says to skip sample data (Section 8 or 10).
 - *"Do NOT publish the app in this turn."*
 
-Send it as **one Mentor turn** on the session, unchanged: don't rewrite or drop the guardrails, and don't split the spec into several turns up front.
+Send it as one Mentor turn on the session, unchanged: don't rewrite or drop the guardrails. Then:
 
-> **Build order, and its trade-off.** The main `outsystems` skill publishes the data model before asking for screens. This skill is an exception on purpose: the spec is agreed and validated up front (Steps 1–3), so Mentor builds the data model, the sample-data timer and the screens together in one turn, and the session is published once (Step 6). The cost is durability: nothing is saved until that publish, and a new app can't be found in the catalog before it, so if the session ends first (the server's idle limit while a question waits, or a turn that can't be recovered) the whole build is lost. So ask the publish question as soon as the turn has landed, and say in it that the session ends after the idle limit.
+1. **Poll the run to terminal** and read its completion signals **as the main `outsystems` skill describes**; save the terminal result to `<work>/result-data.json`. Render the report, which records whether the turn landed:
 
-Poll the run to terminal and read its completion signals **as the main `outsystems` skill describes**; save the terminal result to `<work>/mentor-result.json`. Then render the build report, which also records whether the turn landed:
+   ```bash
+   python3 "<skill>/scripts/build.py" render-report --spec "<work>/spec.md" --result "<work>/result-data.json" --label data --app-key "<app_key>" --output "<work>/build-report.md"
+   ```
+
+   It accepts a saved terminal response, the list of pages read from the start of the run, or either one as the harness saved it, and shows each turn's status, whether it **landed** (the main skill's completion signals: status, turn error, validation errors, whether the change was applied) and Mentor's summary. **Exit 1 means the last turn didn't land:** don't publish it as built.
+2. **Check whether Mentor published on its own.** The prompt forbids it, but a build turn can still end in a publish. Look in the turn's result and events for a publication key or a "published" message. If it did, don't publish again: tell the user Mentor published without asking, and follow that publish to its outcome.
+3. **If the turn didn't land**, send one targeted fix turn on the same session (the problems with concrete values, ending with "Do NOT publish the app in this turn"), save its result next to the first one, and render the report again with one `--result` and `--label` per turn, in order. A fix turn that landed clears the earlier failure.
+4. **Publish part 1** (Publishing, below).
+5. **Check the sample data** (skip when the spec says to skip it). `BootstrapTimer` runs right after the publish. Search the app's runtime logs for "Bootstrap" and expect one line per non-static entity: `Bootstrap<Entity>: inserted N rows`, or `skipped, N present` when an earlier publish already seeded it. The timer runs asynchronously, so if nothing shows yet, wait briefly and check once more. If a line shows an error, or there is still nothing, don't start part 2: send one fix turn on the same session (wire the timer, or fix the named action), confirm and publish it, and check again. If it still fails, carry on and say so in the report.
+
+### Step 6: Part 2, the screens
+
+Only after part 1 is published. If the user declined that publish, stop here unless they explicitly ask to go on; tell them everything stays unpublished in the session until the end.
 
 ```bash
-python3 "<skill>/scripts/build.py" render-report --spec "<work>/spec.md" --result "<work>/mentor-result.json" --app-key "<app_key>" --output "<work>/build-report.md"
+python3 "<skill>/scripts/build.py" build-prompt --spec "<work>/spec.md" --part screens
 ```
 
-It accepts a saved terminal response, the list of pages read from the start of the run, or either one as the harness saved it, and shows each turn's status, whether it **landed** (the main skill's completion signals: status, turn error, validation errors, whether the change was applied) and Mentor's summary. **Exit 1 means the last turn didn't land:** don't publish it as built. Each turn keeps its own Landed line, so a fix turn that landed clears an earlier failure.
+The output is the Mentor turn for part 2: the whole spec, then the screen guardrails, among them:
+- *"Respect the role-per-screen assignments in Section 4 EXACTLY. Do NOT default screens to anonymous/public access."*
+- *"The data part already exists: build on it."* No new roles or entities, and no changes to the bootstrap actions or timer; a missing attribute or role is added and named in the summary.
+- *"Do NOT publish the app in this turn."*
 
-**Check whether Mentor published on its own.** The prompt forbids it, but a build turn can still end in a publish. Look in the turn's result and events for a publication key or a "published" message. If it did publish, don't publish again: tell the user Mentor published without asking, follow that publication to terminal, and carry on from Step 7.
+Send it on the **same session**, unchanged, and handle it as in part 1: poll, save the terminal result to `<work>/result-screens.json`, render the report with every turn so far (`--result "<work>/result-data.json" --label data --result "<work>/result-screens.json" --label screens`, plus any fix turns, in order), check that Mentor didn't publish on its own, and send one fix turn if it didn't land. Then **publish part 2**.
 
-If the turn didn't land, send one targeted fix turn on the same session (the problems with concrete values, ending with "Do NOT publish the app in this turn"), save its result next to the first one, and render the report again with one `--result` per turn, in order.
+> **Don't cancel a turn whose work you want:** its in-flight edits may not land. If a turn fails or times out, retry in the same session as the main `outsystems` skill describes: raise the turn-time ceiling where the catalog offers one; otherwise send a follow-up turn that asks Mentor to finish only what is still missing from this part, reusing what it already built. If the session ended after part 1 was published, open a new session on the same `app_key` and send part 2 there.
 
-> **Don't cancel a turn whose work you want:** its in-flight edits may not land. If a turn fails or times out, retry in the same session as the main `outsystems` skill describes: raise the turn-time ceiling where the catalog offers one; otherwise send a follow-up turn that asks Mentor to finish only what is still missing from the spec, reusing what it already built (the prompt's rules forbid a second set of bootstrap actions or timer).
+### Publishing (after each part)
 
-### Step 6: Publish
+Publishing is a tenant write. **Before each publish**, restate what will be published ("publish the data model of app X to its development environment", then "publish the screens of app X") and wait for explicit confirmation; ask as soon as the part has landed, since the session ends after the server's idle limit and takes everything unpublished with it. Then:
 
-Publishing is a tenant write. **Before publishing**, restate what will be published ("publish app X to its development environment") and wait for explicit confirmation; ask as soon as the turn has landed, and say that the session ends after the server's idle limit with everything unpublished (Step 5). Then:
-
-- **Publish the session** through the publish route the catalog offers (never by app key; main `outsystems` skill), with a short publish note.
-- **If the publish is refused**, handle it as the main `outsystems` skill describes.
-- **If the publish route itself is retired** (the call answers that it is no longer available and names another route, such as a Mentor turn whose message is "Publish"), that is not a refusal: use the route it names on the same session. It is the same publish, so the confirmation you already have covers it; poll that run to terminal.
-- **Poll the publication to terminal**, as the main `outsystems` skill describes.
+- **Publish with a publish turn**, as the main `outsystems` skill describes: a Mentor turn of its own on the session that asks Mentor to publish, with a short publish note in the prompt. There is no separate publish call.
+- **Read the outcome from the finished run** (main `outsystems` skill): it succeeded, failed, timed out, or met someone else's newer revision. A publish that timed out may still land, so never publish again on it.
+- **If a publish turn fails, check the app's revision history before publishing again:** a turn reported as failed can still have published. Publish again only if no new revision appeared.
+- **If the publish is refused**, handle it as the main `outsystems` skill describes: the remedy is a further Mentor turn that completes the work, not a retried publish.
 
 If the user declines a publish, don't publish. Tell them the changes stay in the Mentor session (give the `sessionId`) and can still be published, but only until the session goes idle (main `outsystems` skill).
 
 ### Step 7: Check the build
 
-When the publish has landed:
+When the part 2 publish has landed:
 
 - Fetch the runtime URL from the environment's app info, as the main `outsystems` skill describes, and give the user the `url` as a link.
 - **Access per screen:** compare each screen's roles with section 4, using the screens and roles context lookups for the app.
-- **Sample data** (skip when the spec says to skip it): `BootstrapTimer` runs right after the publish. Search the app's runtime logs for "Bootstrap" and expect one line per non-static entity, `Bootstrap<Entity>: inserted N rows`. The timer runs asynchronously, so if nothing shows yet, wait briefly and check once more. If a line shows an error, or there is still nothing, send one fix turn on this app (on the same session if it's still open, otherwise a new session with the app loaded), confirm and publish it, and check again; if it still fails, say so in the report.
 - Release the session once its work is published, as the main `outsystems` skill describes.
 
 ### Step 8: Report to the user (4–6 lines)
 
-- App name, `app_key` and revision, with the runtime URL as a link
-- What was built (entity, role and screen counts) and anything Mentor skipped or left as a manual step
-- The Step 7 checks: access per screen, sample data, and anything still wrong
+- App name, `app_key` and the revision of each publish, with the runtime URL as a link
+- What was built (entity, role and screen counts) and anything Mentor skipped, added or left as a manual step
+- The checks: sample data (Step 5), access per screen (Step 7), and anything still wrong
 - **Sample data:** that the app now contains `BootstrapData` and `BootstrapTimer`, which runs on every publish, deployment and automatic patch in whichever stage the app is in and refills any empty sample-data table. To keep those tables empty, the timer has to be removed first: offer to do it in one Mentor turn on this app, confirmed and published like any other change
 - The working folder and `build-report.md`
 - If something is unpublished: the `sessionId`, and that it must be published before the session goes idle
