@@ -263,6 +263,12 @@ def test_assembled_spec_follows_the_template_and_passes(tmp_path):
     assert "OK: 0 warning(s)" in p.stdout
 
 
+def test_the_out_of_scope_question_asks_for_at_least_one_item():
+    q = {x["id"]: x for x in json.loads(run("list-questions").stdout)["questions"]}["out_of_scope"]
+    assert q["required"] and "Name at least one thing" in q["prompt"]
+    assert "everything sensible" not in q["prompt"]
+
+
 def test_a_missing_required_answer_is_reported_as_such(tmp_path):
     answers = dict(ANSWERS)
     del answers["app_shell"]
@@ -401,10 +407,9 @@ def test_the_data_part_carries_the_data_sections_only():
     body = spec_in(prompt("data"))
     assert body.startswith("# App Spec: TaskTracker")
     for kept in ("## 1. Overview", "## 2. Roles", "## 3. Data model", "## 6. Integrations",
-                 "## 8. Out of scope", "## 10. Notes for Mentor"):
+                 "## 8. Out of scope", "## 9. Acceptance criteria", "## 10. Notes for Mentor"):
         assert kept in body, kept
-    for dropped in ("## 4. Screens + RBAC", "## 5. Server actions", "## 7. UI/UX direction",
-                    "## 9. Acceptance criteria"):
+    for dropped in ("## 4. Screens + RBAC", "## 5. Server actions", "## 7. UI/UX direction"):
         assert dropped not in body, dropped
 
 
@@ -413,7 +418,7 @@ def test_the_data_part_keeps_each_section_whole_and_in_order():
     body = spec_in(prompt("data"))
     sections = re.split(r"(?m)^(?=## \d+\.)", text)
     expected = [sections[0].rstrip()] + [x.rstrip() for x in sections[1:]
-                                         if re.match(r"## (1|2|3|6|8|10)\.", x)]
+                                         if re.match(r"## (1|2|3|6|8|9|10)\.", x)]
     assert body == "\n\n".join(expected)
 
 

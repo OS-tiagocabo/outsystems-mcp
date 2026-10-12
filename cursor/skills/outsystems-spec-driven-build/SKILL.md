@@ -114,7 +114,7 @@ The build follows the main `outsystems` skill's order: the data model is built a
 python3 "<skill>/scripts/build.py" build-prompt --spec "<work>/spec.md" --part data
 ```
 
-The output is the Mentor turn for part 1: the spec's data sections (overview, roles, data model, integrations, out of scope, notes) between `<spec>` and `</spec>`, then the data guardrails, among them:
+The output is the Mentor turn for part 1: the spec's data sections (overview, roles, data model, integrations, out of scope, acceptance criteria, notes) between `<spec>` and `</spec>`, then the data guardrails, among them:
 - *"Build only the data part in this turn. Do NOT create screens, screen logic, navigation or menu entries yet."*
 - *"Bootstrap the sample data with a Timer that runs when the app is published"*: a `Bootstrap<Entity>` action for each non-static entity that inserts only when the entity is empty, one generated `Create<Entity>` call per row, all called by `BootstrapData` from a Timer named `BootstrapTimer`; each action logs `inserted N rows` or `skipped, N present`; no SQL inserts, literal dates. Skipped when the spec says to skip sample data (Section 8 or 10).
 - *"Do NOT publish the app in this turn."*

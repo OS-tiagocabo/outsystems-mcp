@@ -83,7 +83,7 @@
       "id": "out_of_scope",
       "section": "8. Out of scope",
       "kind": "open",
-      "prompt": "What do you explicitly NOT want Mentor to build? This stops over-building. Examples: 'No public REST endpoints', 'No multi-tenant isolation', 'No admin UI for audit logs — server-side logging is fine'. If 'just build everything sensible', say so.",
+      "prompt": "What do you explicitly NOT want Mentor to build? This stops over-building. Examples: 'No public REST endpoints', 'No multi-tenant isolation', 'No admin UI for audit logs — server-side logging is fine'. Name at least one thing: the spec check needs this section.",
       "required": true,
       "writes_to": "## 8. Out of scope"
     },

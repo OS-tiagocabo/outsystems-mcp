@@ -77,7 +77,7 @@ NAME = r"[^\W\d_]\w{0,40}"
 # is known to make.
 
 # Spec sections the data part sends; the screens part sends the whole spec.
-DATA_SECTIONS = ("1", "2", "3", "6", "8", "10")
+DATA_SECTIONS = ("1", "2", "3", "6", "8", "9", "10")
 
 PROMPT_INTRO = {
     "data": (
