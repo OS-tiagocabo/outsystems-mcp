@@ -6,7 +6,7 @@
       "id": "purpose",
       "section": "1. Overview",
       "kind": "open",
-      "prompt": "What's the name of this app, and what does it do? Give me one paragraph: who uses it, what's the core value, and what's the rough size (S/M/L)?",
+      "prompt": "What does this app do? Give me one paragraph: who uses it, what's the core value, and what's the rough size (S/M/L)?",
       "required": true,
       "writes_to": "## 1. Overview"
     },
@@ -14,7 +14,7 @@
       "id": "app_shell",
       "section": "1. Overview",
       "kind": "open",
-      "prompt": "Is this a new app, or an empty app you already created in ODC Studio? Give the app name and say 'new' or 'existing'. A new app is created from the standard Web application template, after you confirm.",
+      "prompt": "Is this a new app, or an empty app you already created in ODC Studio? Say 'new' or 'existing'. A new app is created from the standard Web application template, after you confirm.",
       "required": true,
       "writes_to": "**Target app:**"
     },
@@ -83,7 +83,7 @@
       "id": "out_of_scope",
       "section": "8. Out of scope",
       "kind": "open",
-      "prompt": "What do you explicitly NOT want Mentor to build? This stops over-building. Examples: 'No public REST endpoints', 'No multi-tenant isolation', 'No admin UI for audit logs — server-side logging is fine'. Name at least one thing: the spec check needs this section.",
+      "prompt": "What do you explicitly NOT want Mentor to build? This stops over-building. Examples: 'No public REST endpoints', 'No multi-tenant isolation', 'No admin UI for audit logs — server-side logging is fine'. Name at least one specific exclusion, as a full sentence: the spec check needs this section.",
       "required": true,
       "writes_to": "## 8. Out of scope"
     },

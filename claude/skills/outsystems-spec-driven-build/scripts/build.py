@@ -33,6 +33,7 @@ import argparse
 import json
 import re
 import sys
+import unicodedata
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -89,9 +90,9 @@ PROMPT_INTRO = {
     ),
     "screens": (
         "Build the screens of the OutSystems application described in the spec between "
-        "<spec> and </spec>, completely, in this turn, on top of the data part (roles, "
-        "entities, sample data) that the previous turn built and the app has published. "
-        "Apply the constraints at the bottom EXACTLY."
+        "<spec> and </spec>, completely, in this turn, on top of the data part (roles "
+        "and entities) that already exists in the app. Apply the constraints at the "
+        "bottom EXACTLY."
     ),
 }
 
@@ -224,8 +225,11 @@ def _read_text(path: Path, what: str):
     if not path.exists():
         print(f"{what} not found: {path}", file=sys.stderr)
         return None
+    data = path.read_bytes()
     try:
-        return path.read_bytes().decode("utf-8-sig")
+        if data.startswith((b"\xff\xfe", b"\xfe\xff")):   # UTF-16, as PowerShell 5.1 writes with `>`
+            return data.decode("utf-16")
+        return data.decode("utf-8-sig")
     except UnicodeDecodeError:
         print(f"{what} is not UTF-8 text: {path}; save it as UTF-8 and try again", file=sys.stderr)
         return None
@@ -242,6 +246,17 @@ def _read_json_object(path: Path, what: str):
         print(f"{what} is not valid JSON: {path}: {exc}", file=sys.stderr)
         return None
     return data
+
+
+# A <spec> or </spec> tag inside the spec would end the spec block in the
+# Mentor prompt, so the lines after it would read as instructions. Invisible
+# characters are dropped and look-alike characters folded before the check.
+SPEC_TAG = re.compile(r"<\s*/?\s*spec(?:\s[^>]*)?>", re.I)
+
+
+def _has_spec_tag(text: str) -> bool:
+    folded = unicodedata.normalize("NFKC", re.sub(r"[\u00ad\u200b-\u200f\u2060\ufeff]", "", text))
+    return bool(SPEC_TAG.search(folded))
 
 
 def _sections(text: str) -> dict[str, tuple[str, str]]:
@@ -278,6 +293,9 @@ def _as_bullets(answer: str) -> list[str]:
         line = line.strip()
         if not line:
             continue
+        if line.startswith("|"):             # a markdown table row: keep it as written
+            out.append(line)
+            continue
         if line.startswith(("- ", "* ")):
             line = line[2:].strip()
         m = re.match(rf"^({NAME})\s*:\s*(.+)$", line)
@@ -299,6 +317,8 @@ def _as_screen_table(answer: str) -> list[str]:
         if not line:
             continue
         cells = [c.strip() for c in line.strip("|").split("|")]
+        if all(re.fullmatch(r":?-{3,}:?", c) for c in cells if c) or cells[0].lower() == "screen":
+            continue                         # a header or separator row the user typed
         cells = (cells + ["", "", ""])[:3]
         rows.append("| " + " | ".join(cells) + " |")
     return rows
@@ -333,10 +353,15 @@ def cmd_assemble_spec(args: argparse.Namespace) -> int:
             return value
         return NOT_PROVIDED if qid in required else SKIPPED
 
-    # Title: the app name from the target-app answer ("TaskTracker (new)"),
-    # else the first word of the purpose, as in "TaskTracker. Internal team ...".
-    m = re.match(rf"\s*({NAME})", raw("app_shell")) or re.match(rf"\s*({NAME})", raw("purpose"))
-    name = m.group(1) if m else "Unnamed"
+    # Title: the app name the user gave in Step 1; without it, the first word
+    # of the target-app answer ("TaskTracker (new)") or of the purpose.
+    if args.app_name:
+        name = args.app_name.strip()
+    else:
+        m = re.match(rf"\s*({NAME})", raw("app_shell")) or re.match(rf"\s*({NAME})", raw("purpose"))
+        name = m.group(1) if m else "Unnamed"
+    # The target-app line: "TaskTracker (new)" from the Step 1 name and the answer.
+    target = f"{name} ({raw('app_shell')})" if args.app_name and raw("app_shell") else ans("app_shell")
     out: list[str] = [f"# App Spec: {name}", ""]
 
     def section(heading: str, body: list[str]) -> None:
@@ -348,7 +373,7 @@ def cmd_assemble_spec(args: argparse.Namespace) -> int:
 
     section("## 1. Overview", [
         f"**Purpose:** {ans('purpose')}", "",
-        f"**Target app:** {ans('app_shell')}", "",
+        f"**Target app:** {target}", "",
         f"**Style direction:** {ans('style_direction')}",
     ])
     section("## 2. Roles", listed("roles", _as_bullets))
@@ -456,8 +481,17 @@ def cmd_validate_spec(args: argparse.Namespace) -> int:
             errors.append(f"## {num}. {title}: missing")
         elif "(NOT PROVIDED" in body:
             errors.append(f"## {num}. {title}: a required answer was not provided")
-        elif len(_content(body)) < 50:
+        elif num != "2" and len(_content(body)) < 50:   # section 2 has its own "no roles" check
             errors.append(f"## {num}. {title}: too short (under 50 characters)")
+
+    # A repeated section number: validation reads only the first, Mentor gets both.
+    numbers = re.findall(r"^## (\d+)\.", text, re.M)
+    for num in sorted({n for n in numbers if numbers.count(n) > 1}, key=int):
+        errors.append(f"## {num}.: appears more than once; merge it into one section")
+
+    if _has_spec_tag(text):
+        errors.append("the spec contains a <spec> or </spec> tag; remove it "
+                      "(it would end the spec block in the Mentor prompt)")
 
     # Placeholders left from the template, anywhere in the spec.
     left = sorted(p for p in _template_placeholders() if p in text)
@@ -567,6 +601,10 @@ def cmd_build_prompt(args: argparse.Namespace) -> int:
     spec_text = _read_text(spec_path, "spec")
     if spec_text is None:
         return 1
+    if _has_spec_tag(spec_text):
+        print(f"spec contains a <spec> or </spec> tag: {spec_path}; remove it and run validate-spec",
+              file=sys.stderr)
+        return 1
     spec_text = spec_text.strip()
     if args.part == "data":
         spec_text = _data_slice(spec_text)
@@ -659,11 +697,12 @@ def _pages(raw) -> list[dict]:
 def _read_run(raw) -> dict:
     """Normalise one saved run result: a terminal response, the list of pages
     read from cursor 0, or either as the harness saved it. The status, result
-    and errors come from the last page that has a status; events from all."""
+    and errors come from the last page that has a status; the summary text from
+    the events of all pages."""
     pages = _pages(raw)
     if not pages:
         return {"run_id": "", "status": "unknown", "result": {}, "validation": {},
-                "events": [], "summary": "", "error": ""}
+                "summary": "", "error": ""}
     last = next((p for p in reversed(pages) if p.get("status")), pages[-1])
     events: list = []
     for p in pages:
@@ -680,7 +719,6 @@ def _read_run(raw) -> dict:
         "status": str(last.get("status") or "unknown"),
         "result": result,
         "validation": validation if isinstance(validation, dict) else {},
-        "events": events,
         "summary": str(summary or ""),
         "error": str(error),
     }
@@ -803,6 +841,7 @@ def main(argv: list[str] | None = None) -> int:
     sp = sub.add_parser("assemble-spec", help="Assemble a spec.md from interview answers JSON")
     sp.add_argument("--answers", required=True, help="Path to a JSON object with answers keyed by question id")
     sp.add_argument("--output", required=True, help="Path to write spec.md")
+    sp.add_argument("--app-name", help="The app name from Step 1, used as the spec's title")
     sp.set_defaults(func=cmd_assemble_spec)
 
     sp = sub.add_parser("validate-spec", help="Check a spec.md before Mentor builds from it")
