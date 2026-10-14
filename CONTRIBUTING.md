@@ -53,6 +53,7 @@ claude/                   # The Claude plugin folder: what `claude plugin instal
     outsystems-app-architecture/      # Beta skill, same layout
     outsystems-dependency-impact/     # Beta skill, same layout (source for the Cursor and Kiro copies)
     outsystems-design-to-app/         # Beta skill: SKILL.md, references/, assets/enriched-blueprint.json, agents/openai.yaml (no script)
+    outsystems-spec-driven-build/     # Beta skill: SKILL.md, scripts/build.py, templates/, assets/report-template.md, agents/openai.yaml
 copilot/
   mcp.json                # Copilot MCP server configuration
   skill.md                # Agent guidance for Copilot
@@ -64,7 +65,7 @@ cursor/
   skills/
     outsystems/
       SKILL.md            # Agent guidance loaded by Cursor plugin
-    outsystems-*/         # Byte-identical copies of the four Beta skills under claude/skills/
+    outsystems-*/         # Byte-identical copies of the five Beta skills under claude/skills/
 kiro/
   agents/
     status-watcher.json   # Kiro status-watcher agent; the README's Kiro recipe copies it into a workspace's .kiro/agents/
@@ -73,7 +74,7 @@ kiro/
     skills/
       outsystems/
         SKILL.md          # Agent-facing skill loaded into Kiro Chat
-      outsystems-*/       # Byte-identical copies of the four Beta skills under claude/skills/
+      outsystems-*/       # Byte-identical copies of the five Beta skills under claude/skills/
 tests/
   skills/                 # Offline pytest suites for the Beta skills' scripts, with anonymised fixtures
 SKILL.md                  # Generic skill content for other harnesses
@@ -125,7 +126,7 @@ Common scopes: `plugin`, `power`, `kiro`, `skill`, `mentor`, `README`.
 
 Apart from the Beta skills' scripts, the shipped content has no automated test suite: verify changes manually, accounting for every harness in the AGENTS.md table as step 4 above requires. Four parts are covered by `.github/tests/run.sh`: `.github/workflows/ai-review.yml`'s shell steps and structural guarantees; the deployment-impact recipe in all five skill docs, which `.github/tests/skill-deploy-impact-recipe.test.sh` pins word for word and checks is byte-identical across them, and `.github/tests/spec_deploy_impact_recipe.test.sh` checks against the recipe's requirements; the "Platform first" Rules bullet, byte-identical across the five skill docs, with the O11 exclusions in the skill and Beta skill descriptions and in the feedback scope, which `.github/tests/skill-platform-check.test.sh` checks; and the Claude plugin's status-watcher hook, which `.github/tests/status-watcher-hook.test.sh` runs from the command in `claude/hooks/hooks.json` against sample hook inputs. `spec_deploy_impact_recipe.test.sh` also checks that the five plugin manifests carry one version. Run it when you touch that workflow, a skill doc, or the hook; no CI runs it.
 
-The three architecture Beta skills' scripts have offline suites in `tests/skills/` (Python 3.8+ and `pytest`; the scripts themselves use only the standard library): `python3 -m pytest -q -p no:cacheprovider tests/skills`. They also check that the Cursor and Kiro copies match `claude/skills/`. `.github/workflows/skills-tests.yml` runs them on every pull request that touches those folders. They test the scripts against recorded responses; a change to a Beta skill still needs a live run through an agent against a tenant.
+The three architecture Beta skills' scripts and `outsystems-spec-driven-build`'s script have offline suites in `tests/skills/` (Python 3.8+ and `pytest`; the scripts themselves use only the standard library): `python3 -m pytest -q -p no:cacheprovider tests/skills`. They also check that the Cursor and Kiro copies match `claude/skills/`. `.github/workflows/skills-tests.yml` runs them on every pull request that touches those folders. They test the scripts against recorded responses; a change to a Beta skill still needs a live run through an agent against a tenant.
 
 ### Claude Code (plugin + skills)
 
