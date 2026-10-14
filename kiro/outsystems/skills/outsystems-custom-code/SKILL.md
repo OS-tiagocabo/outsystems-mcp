@@ -471,7 +471,7 @@ OutSystems' own public external-library repositories use (see [Worked Examples](
 
 Deploy with the main `outsystems` skill's "Publish a new external library" flow: upload the ZIP, poll until the library is ready for review (pull the operation logs on a validation failure), publish it, and poll until it is published. If the `outsystems` MCP server isn't connected, follow the main skill's setup for your harness.
 
-- **Uploading and publishing are tenant writes: confirm each one.** Before the upload, restate it ("upload the external library MyLibrary from MyLibrary.zip", and say whether it is a new library or a new revision of an existing one, by its `[OSInterface]` `Name`) and wait for explicit confirmation. Before the publish, restate it ("publish the external library MyLibrary") and wait again. Don't offer to approve them in advance.
+- **Uploading and publishing are tenant writes: confirm each one.** Before the upload, look up the tenant's external libraries (a read-only listing) for one with the same `[OSInterface]` `Name`. Then restate the upload ("upload the external library MyLibrary from MyLibrary.zip") and say whether it creates a new library or a new revision of the existing one, with that library's key. If the lookup can't tell, say so; don't guess. Wait for explicit confirmation. Before the publish, restate it ("publish the external library MyLibrary") and wait again. Don't offer to approve them in advance.
 - If the user declines the publish, the uploaded library stays unpublished; tell them, with the operation key.
 - To use the library in an app, follow the main skill's "Reference an external library from an app". The app's publish is a tenant write too and gets its own confirmation.
 
