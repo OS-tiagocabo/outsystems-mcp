@@ -2,8 +2,9 @@
 # Runs every suite in this directory. No GitHub Actions workflow invokes
 # it: run it locally before pushing a change to `ai-review.yml`, whose
 # shell steps only ever execute on a privileged runner otherwise, to any
-# skill doc, whose deployment-impact recipe two suites here check, or to
-# the Claude plugin's hook, which one suite runs the way Claude Code does.
+# skill doc, whose deployment-impact recipe two suites here check and whose
+# withheld-graph caveat one suite checks, or to the Claude plugin's hook,
+# which one suite runs the way Claude Code does.
 #
 # Needs: bash, git, jq, python3 with PyYAML.
 

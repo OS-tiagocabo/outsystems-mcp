@@ -628,6 +628,7 @@ def _ref_kind(r: dict) -> str:
 
     Prefers the scalar producer kind when present:
       - legacy MCP:                     `kind`  (e.g. "AIModelConnection", "eSpace")
+      - schemaVersion 3 / stored-xre:   `importedKind`
       - schemaVersion 2 / oml-fallback: `importedKind`
     Otherwise falls back to the schemaVersion-2 / context-service `kinds`
     LIST of imported element kinds (e.g. ["entities"]), joined to a string.
@@ -647,6 +648,7 @@ def _refs_deps(raw) -> list:
     """Dependency edges from one app_refs response (or dependency-impact cache
     file). Tolerant of every reference shape seen in the wild:
       - legacy:                         {moduleKey, name, kind, revision}
+      - schemaVersion 3 / stored-xre:   {producerAssetKey, producerAssetName, importedKind}
       - schemaVersion 2 / oml-fallback: {producerAssetKey, producerAssetName, importedKind}
       - schemaVersion 2 / context-service (live 2026-07-09):
                                         {producerAssetKey, producerAssetName, kinds: [...]}
@@ -683,7 +685,7 @@ def _build_deps(refs_path, app_key: str) -> list:
 def _refs_coverage(refs_raw):
     """{source, indexedKinds} of an app_refs answer, or None. indexedKinds is
     None when a context-service answer does not report it (unknown coverage);
-    it does not apply to an oml-fallback answer."""
+    it does not apply to a stored-xre or oml-fallback answer."""
     if not isinstance(refs_raw, dict) or not isinstance(refs_raw.get("source"), str):
         return None
     kinds = refs_raw.get("indexedKinds")
