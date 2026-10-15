@@ -73,24 +73,33 @@ done
 
 # The commands below are the README text verbatim; F and U are the
 # placeholders the agent fills with the file's path and the skill URL.
+# `read` already strips the heredoc's final newline under the default IFS;
+# each `${VAR%$'\n'}` keeps the value one line even if IFS changes, since a
+# newline would split the `grep -F` pattern in `count`.
 read -r -d '' BASH_APPEND <<'EOF'
 t=$(mktemp) && curl -fsSL U -o "$t" && { [ -z "$(tail -c1 F)" ] || echo >> F; cat "$t" >> F; }
 EOF
+BASH_APPEND=${BASH_APPEND%$'\n'}
 read -r -d '' PS_APPEND <<'EOF'
 & { $ErrorActionPreference='Stop'; $t=(New-TemporaryFile).FullName; Invoke-WebRequest -UseBasicParsing -Uri U -OutFile $t; $d=(Resolve-Path F).Path; $nl=([IO.File]::ReadAllBytes($d)[-1] -ne 10); $b=[IO.File]::ReadAllBytes($t); $f=[IO.File]::Open($d,'Append'); if($nl){$f.WriteByte(10)}; $f.Write($b,0,$b.Length); $f.Close() }
 EOF
+PS_APPEND=${PS_APPEND%$'\n'}
 read -r -d '' BASH_REPLACE_HEADING <<'EOF'
 t=$(mktemp) && curl -fsSL U -o "$t" && o=$(LC_ALL=C grep -b -m1 -x '# OutSystems - Remote MCP' F | cut -d: -f1) && [ -n "$o" ] && { head -c "$o" F; cat "$t"; } > "$t.new" && cat "$t.new" > F
 EOF
+BASH_REPLACE_HEADING=${BASH_REPLACE_HEADING%$'\n'}
 read -r -d '' BASH_REPLACE_FRONTMATTER <<'EOF'
 t=$(mktemp) && curl -fsSL U -o "$t" && n=$(LC_ALL=C grep -b -m1 -x 'name: outsystems' F | cut -d: -f1) && [ -n "$n" ] && o=$((n-4)) && [ "$(tail -c +$((o+1)) F | head -n1)" = '---' ] && { head -c "$o" F; cat "$t"; } > "$t.new" && cat "$t.new" > F
 EOF
+BASH_REPLACE_FRONTMATTER=${BASH_REPLACE_FRONTMATTER%$'\n'}
 read -r -d '' PS_REPLACE_HEADING <<'EOF'
 & { $ErrorActionPreference='Stop'; $t=(New-TemporaryFile).FullName; Invoke-WebRequest -UseBasicParsing -Uri U -OutFile $t; $d=(Resolve-Path F).Path; $a=[IO.File]::ReadAllBytes($d); $n=[string][char]10; $i=[Text.Encoding]::GetEncoding(28591).GetString($a).IndexOf($n+'# OutSystems - Remote MCP'+$n,[StringComparison]::Ordinal); if($i -lt 0){throw 'marker not found'}; [IO.File]::WriteAllBytes($d,[byte[]]($a[0..$i]+[IO.File]::ReadAllBytes($t))) }
 EOF
+PS_REPLACE_HEADING=${PS_REPLACE_HEADING%$'\n'}
 read -r -d '' PS_REPLACE_FRONTMATTER <<'EOF'
 & { $ErrorActionPreference='Stop'; $t=(New-TemporaryFile).FullName; Invoke-WebRequest -UseBasicParsing -Uri U -OutFile $t; $d=(Resolve-Path F).Path; $a=[IO.File]::ReadAllBytes($d); $n=[string][char]10; $i=[Text.Encoding]::GetEncoding(28591).GetString($a).IndexOf($n+'---'+$n+'name: outsystems'+$n,[StringComparison]::Ordinal); if($i -lt 0){throw 'marker not found'}; [IO.File]::WriteAllBytes($d,[byte[]]($a[0..$i]+[IO.File]::ReadAllBytes($t))) }
 EOF
+PS_REPLACE_FRONTMATTER=${PS_REPLACE_FRONTMATTER%$'\n'}
 
 README="$REPO_ROOT/README.md"
 section "README: adding the skill to an O11 instructions file"
