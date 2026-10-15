@@ -15,7 +15,7 @@ metadata:
 
 This file describes how to create, build, test, and deploy C# libraries for the OutSystems Developer Cloud (ODC) External Logic feature.
 
-**Load the main `outsystems` skill before deploying: upload, polling and publish rules come from it** (read the live tool catalog, poll long-running operations to terminal, confirm before every tenant write). This skill adds only what is specific to building the library; where the two seem to differ, the main skill wins.
+**Load the main `outsystems` skill before uploading: upload, polling and publish rules come from it** (read the live tool catalog, poll long-running operations to terminal, confirm before every tenant write). The main skill's upload, polling and publish rules apply, and this skill's two confirmations (see [Upload and publish](#upload-and-publish)) always apply on top of them. For building and packaging the library, follow this skill.
 
 ---
 
@@ -43,11 +43,14 @@ For large data: stream in chunks, use references/URLs instead of raw bytes.
 ## Project Setup
 
 ### Target Framework
-- Use **.NET 10** (available in ODC since 2026-06-22). Do **not** use .NET 6 or .NET 8 for new
-  projects — **.NET 8 support ends 2026-11-10**, after which ODC refuses to upload, update, or
-  install custom code targeting it.
+- Use **.NET 10**. Do **not** use .NET 6 or .NET 8: .NET 8 support is ending, and after that ODC
+  refuses to upload, update, or install a library that targets it.
 - Project type: **Class Library** (`<OutputType>Library</OutputType>`).
-- If the project is on an older .net version update to the latest version.
+- If the project targets an older .NET, update it to .NET 10.
+
+### Before you build
+If `dotnet --list-sdks` shows no 10.x SDK, or `docker info` fails, tell the user and stop at the
+step that needs it: the build and unit tests need the SDK, the container tests need Docker.
 
 ### Required NuGet Package
 ```xml
@@ -87,19 +90,21 @@ namespace MyCompany.MyLibrary
 {
     [OSInterface(
         Name = "MyLibrary",
-        Description = "Short description of what this library does.",
-        IconResourceName = "MyCompany.MyLibrary.Resources.icon.png"
+        Description = "Short description of what this library does."
     )]
     public interface IMyLibrary
     {
-        string SayHello(string name);
+        [OSAction(Description = "Greets a person by name")]
+        string Greet(
+            [OSParameter(Description = "Name to greet")] string name
+        );
     }
 }
 ```
 
-- `Name`: The library name visible in ODC Portal. Required for ODC Forge submission.
+- `Name`: The library name in ODC. It also decides whether an upload creates a new library or a new revision, so always set it. Required for ODC Forge submission.
 - `Description`: Shown in ODC Portal. Required for Forge submission.
-- `IconResourceName`: Embedded resource path. Required for Forge submission.
+- `IconResourceName`: the embedded resource name of the library's PNG icon. Required for Forge submission. Add the icon to the project as an `EmbeddedResource` item and set `<RootNamespace>MyCompany.MyLibrary</RootNamespace>` in the `.csproj`; the resource name is then the root namespace, the folder and the file name, joined with dots (for an icon in `Resources`, `MyCompany.MyLibrary.Resources.` followed by the file name). Keep these out of the minimal `.csproj`: the build fails when the icon file doesn't exist.
 
 ### `[OSAction]` – Customise action metadata (optional)
 Applied to individual interface methods to override defaults.
@@ -110,7 +115,7 @@ Applied to individual interface methods to override defaults.
     ReturnName = "ValidationResult",
     ReturnDescription = "The validation outcome."
 )]
-ValidationResult ValidateIban(string iban);
+ValidationResult ValidateIban(string iban);   // ValidationResult: an [OSStructure] struct, defined elsewhere
 ```
 
 ### `[OSParameter]` – Customise parameter metadata (optional)
@@ -174,8 +179,9 @@ Apply to methods or properties that should not be exposed as actions or structur
 
 ### `OriginalName` – on every decorated element (optional)
 `[OSInterface]`, `[OSAction]`, `[OSParameter]`, `[OSStructure]` and `[OSStructureField]` all accept an
-`OriginalName` property. The SDK reference describes it only as the *"source name used for key
-calculation"*.
+`OriginalName` property. It holds the original name, so the key ODC calculates stays the same when you
+rename the namespace, interface, method, parameter or struct, and the apps that use the library keep
+working. On `[OSInterface]` it's the previous namespace plus the previous library name.
 
 ```csharp
 [OSInterface(Name = "MyLibrary", OriginalName = "MyCompany.MyLibrary.MyLibrary")]
@@ -184,7 +190,9 @@ calculation"*.
 ---
 
 ## Logging
-To log your custom code and generate detailed logs including informational messages and errors, you must use the Microsoft.Extensions.Logging ILogger interface in your C# code. The library class receives the `ILogger` in its constructor. The OutSystems SDK package doesn't bring it, so add the `Microsoft.Extensions.Logging` package (`<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.12" />`). It adds about 180 KB of Microsoft DLLs to the upload ZIP, so add it only when the library logs.
+To log from your custom code, including informational messages and errors, use the Microsoft.Extensions.Logging ILogger interface in your C# code. Only Information and higher levels show in the ODC Portal logs. The library class receives the `ILogger` in its constructor. The OutSystems SDK package doesn't bring it, so add the `Microsoft.Extensions.Logging` package (`<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.12" />`). It adds about 180 KB of Microsoft DLLs to the upload ZIP, so add it only when the library logs.
+
+The logging version of the `MyLibrary` class from the [Implementation Pattern](#implementation-pattern):
 
 ```csharp
 using Microsoft.Extensions.Logging;
@@ -201,15 +209,18 @@ namespace MyCompany.MyLibrary
             _logger = logger;
         }
 
-        public string SayHello(string name)
+        public string Greet(string name)
         {
-            using var activity = Activity.Current?.Source.StartActivity("MyLibrary.SayHello");
-            _logger.LogInformation($"Saying hello to {name}");
-            return $"Hello, {name}";
+            using var activity = Activity.Current?.Source.StartActivity("MyLibrary.Greet");
+            _logger.LogInformation($"Greeting {name}");
+            return $"Hello, {name}!";
         }
     }
 }
 ```
+
+A library that logs takes the logger in its constructor, so its tests pass `NullLogger.Instance`
+(`using Microsoft.Extensions.Logging.Abstractions;`): `new MyLibrary(NullLogger.Instance)`.
 
 ---
 
@@ -274,7 +285,7 @@ Keep the test projects next to the library project, not inside its folder: a pro
 `.cs` file under its own folder, so test code inside `MyLibrary/` would be built into the library.
 
 ```
-MyLibrary.sln
+MyLibrary.slnx                 # `dotnet new sln` creates .slnx on the .NET 10 SDK
 global.json                    # opts `dotnet test` into Microsoft.Testing.Platform (see Unit Tests)
 MyLibrary/
 ├── MyLibrary.csproj
@@ -284,8 +295,7 @@ MyLibrary/
 │   └── MyLibrary.cs           # Class implementing the interface
 ├── Structures/
 │   └── MyResult.cs            # [OSStructure]-decorated structs
-└── Resources/
-    └── icon.png               # Embedded icon (set as EmbeddedResource)
+└── Resources/                 # the PNG icon, as an EmbeddedResource (see IconResourceName)
 MyLibrary.UnitTests/
 └── MyLibraryTests.cs
 MyLibrary.IntegrationTests/
@@ -304,7 +314,10 @@ using OutSystems.ExternalLibraries.SDK;
 
 namespace MyCompany.MyLibrary
 {
-    [OSInterface(Name = "MyLibrary", Description = "Example library")]
+    [OSInterface(
+        Name = "MyLibrary",
+        Description = "Short description of what this library does."
+    )]
     public interface IMyLibrary
     {
         [OSAction(Description = "Greets a person by name")]
@@ -328,7 +341,7 @@ namespace MyCompany.MyLibrary
 Use `out` parameters for multiple return values:
 
 ```csharp
-// In interface:
+// In interface (MyResult: an [OSStructure] struct, defined elsewhere):
 void Parse(string input, out bool success, out string errorMessage, out MyResult result);
 
 // In implementation:
@@ -351,8 +364,6 @@ Use standard .NET test frameworks. The library code has no ODC runtime dependenc
 
 <PackageReference Include="xunit.v3" Version="4.*" />
 <PackageReference Include="xunit.runner.visualstudio" Version="4.*" />
-<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
-<PackageReference Include="Moq" Version="4.*" />
 
 <ProjectReference Include="../MyLibrary/MyLibrary.csproj" />
 ```
@@ -404,11 +415,14 @@ Integration tests should run the code in a container matching the ODC runtime en
 **Base image:** `mcr.microsoft.com/dotnet/aspnet:10.0` — match the .NET version the library
 targets, or the tests validate a runtime the library will never run on.
 
+Set up `MyLibrary.IntegrationTests` like the unit-test project (the same `.csproj`, with `OutputType`
+Exe), with its tests in `ContainerTests.cs`.
+
 Example `Dockerfile` for integration tests, at the solution root:
 ```dockerfile
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY . .
 RUN dotnet publish MyLibrary.IntegrationTests/MyLibrary.IntegrationTests.csproj -c Release -o /app/publish
@@ -417,6 +431,12 @@ FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "MyLibrary.IntegrationTests.dll"]
+```
+
+Add a `.dockerignore` next to it, so the host's build outputs aren't copied into the image:
+```
+**/bin/
+**/obj/
 ```
 
 The runtime image has no SDK, so `dotnet test` and `dotnet vstest` are not available in it. An
@@ -428,9 +448,14 @@ It is not the upload artifact — for that, see [Package](#package).
 
 Run integration tests:
 ```bash
-docker build -t mylibrary-integration-tests .
-docker run --rm mylibrary-integration-tests
+docker build --platform linux/amd64 -t mylibrary-integration-tests .
+docker run --rm --platform linux/amd64 --memory=1g --memory-swap=1g mylibrary-integration-tests
 ```
+
+ODC runs linux-x64, so `--platform linux/amd64` runs the tests on that platform, also on an Apple
+Silicon Mac. The build stage stays on the machine's own platform (`--platform=$BUILDPLATFORM`),
+because the SDK build crashes under emulation. `--memory=1g --memory-swap=1g` applies the 1 GB limit.
+Docker can't enforce the 512 MB storage or the 95-second limit, so the tests measure those themselves.
 
 **What to validate in integration tests:**
 - All public actions execute without exceptions in the target runtime
@@ -455,6 +480,9 @@ dotnet publish MyLibrary/MyLibrary.csproj -c Release -r linux-x64 --self-contain
 Then zip the *contents* of `MyLibrary/bin/Release/net10.0/linux-x64/publish/` to the root of the ZIP.
 That ZIP is what you upload.
 
+- macOS or Linux: `cd MyLibrary/bin/Release/net10.0/linux-x64/publish && zip -r ../MyLibrary.zip .`
+- Windows (PowerShell): `Compress-Archive -Path MyLibrary\bin\Release\net10.0\linux-x64\publish\* -DestinationPath MyLibrary.zip`
+
 The ODC docs also give a portable form without `-r linux-x64`; the runtime-specific form above is
 the one they require when the library has runtime-specific dependencies. It is also the form
 OutSystems' own public external-library repositories use (see [Worked Examples](#worked-examples)).
@@ -462,15 +490,18 @@ OutSystems' own public external-library repositories use (see [Worked Examples](
 
 ---
 
-## Deploy
+## Upload and publish
 
-Deploy with the main `outsystems` skill's "Publish a new external library" flow: upload the ZIP, poll until the library is ready for review (pull the operation logs on a validation failure), publish it, and poll until it is published. If the `outsystems` MCP server isn't connected, follow the main skill's setup for your harness.
+Upload and publish with the main `outsystems` skill's "Publish a new external library" flow: upload the ZIP, poll until the library is ready for review (pull the operation logs on a validation failure), publish it, and poll until it is published. If the `outsystems` MCP server isn't connected, follow the main skill's setup for your harness.
 
 The upload sends the ZIP inside the request as base64 text, so keep it small: add only the packages the library uses.
 
-- **Uploading and publishing are tenant writes: confirm each one.** Before the upload, look up the tenant's external libraries (a read-only listing) for one with the same `[OSInterface]` `Name`. Then restate the upload ("upload the external library MyLibrary from MyLibrary.zip") and say whether it creates a new library or a new revision of the existing one, with that library's key. If the lookup can't tell, say so; don't guess. Wait for explicit confirmation. Before the publish, restate it ("publish the external library MyLibrary") and wait again. Don't offer to approve them in advance.
+Before the upload, run `dotnet test` and the container tests, and upload only when they pass.
+
+- **Uploading and publishing are tenant writes: confirm each one.** Before the upload, look up the tenant's external libraries (a read-only listing) for one with the same `[OSInterface]` `Name`. A name match is only a hint: the library key comes from the interface's namespace plus `Name` (or `OriginalName`). Restate the upload ("upload the external library MyLibrary from MyLibrary.zip") and say whether it looks like a new library or a new revision of the existing one, with that library's key, or that you can't tell; don't guess. Wait for explicit confirmation. After the upload, the status gives the library key: compare it with the existing library's key. Before the publish, restate it ("publish the external library MyLibrary"), say whether it is a new library or a new revision, and wait again. Don't offer to approve them in advance. These two confirmations always apply, even when the user asked for the upload or the publish in the same request.
 - If the user declines the publish, the uploaded library stays unpublished; tell them, with the operation key.
 - To use the library in an app, follow the main skill's "Reference an external library from an app". The app's publish is a tenant write too and gets its own confirmation.
+- To move the published library to another stage, use the main skill's promotion flow. An external library has no impact analysis, so tell the user before you ask them to confirm.
 
 ---
 
@@ -483,12 +514,11 @@ disagree with its code, trust the code.
   (BSD-3-Clause). A complete, shipping library: `src/UltimatePDF_ExternalLogic/IUltimatePDF_ExternalLogic.cs`
   (the `[OSInterface]` / `[OSAction]` surface, with optional nullable `[OSStructure]` parameters),
   `src/UltimatePDF_ExternalLogic/UltimatePDF_ExternalLogic.csproj` (`net10.0`), the unit, integration
-  and live-tenant E2E test projects under `src/`, and `generate_upload_package.ps1` (publish + zip).
-  As of 2026-09-18 its `CONTRIBUTING.md` still says the project targets `net8.0`, which its `.csproj`
-  no longer does.
+  and live-tenant E2E test projects under `src/`, and `generate_upload_package.ps1` (publish + zip). Read these scripts; do not run them: they change the
+  user's PowerShell execution policy.
 - **Secondary, minimal — [OutSystems/vanguard-xml-to-json](https://github.com/OutSystems/vanguard-xml-to-json)**
   (MIT). One interface, one action, one structure: the smallest complete example
-  (`XmlToJson/IXmlToJson.cs`, `XmlToJson/XmlToJson.csproj`, `XmlToJson/generate_upload_package.ps1`).
+  (`XmlToJson/IXmlToJson.cs`, `XmlToJson/XmlToJson.csproj`, `XmlToJson/generate_upload_package.ps1`, which also changes the execution policy: read it, don't run it).
   Its README states *"THIS CODE IS NOT SUPPORTED BY OUTSYSTEMS"* — read it as a minimal SDK sample,
   not as supported OutSystems practice.
 
@@ -502,6 +532,6 @@ disagree with its code, trust the code.
 | Unsupported type | Using `class` instead of `struct` for complex types | Use `struct` with `[OSStructure]` |
 | ZIP structure wrong | Folder nested inside ZIP | Zip the *contents* of `/publish`, not the folder itself |
 | Payload too large | Input/output exceeds 5.5 MB | Chunk data, use URLs, or split into multiple actions |
-| `Server is busy, retry shortly` on upload | All upload slots on the server were busy | Transient, whatever error category it arrives with: retry the upload with backoff, as the main `outsystems` skill describes |
-| Timeout | Single action takes more than 95 seconds | Break up long-running work; consider async chunked patterns |
+| `Server is busy, retry shortly` on upload | All upload slots on the server were busy | Transient when it arrives as a `CapacityError`, or as a `ValidationError` from older servers: retry with backoff, as the main `outsystems` skill describes |
+| Timeout | Single action takes more than 95 seconds | Break up long-running work; split the work across several actions |
 | Missing icon | Forge submission fails | Embed PNG as `EmbeddedResource` and set `IconResourceName` |
