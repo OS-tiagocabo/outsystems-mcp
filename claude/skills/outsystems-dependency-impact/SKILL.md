@@ -96,6 +96,9 @@ procedure.
 App Y depend on")
 → **Stop. Skip this skill entirely.** Call `app_refs` on each named
 app, all in one message (~3-5K tokens total). Report the deps inline.
+If `app_refs` answers `refs_fallback_unavailable`, this deployment cannot
+list that app's dependencies yet: tell the user so, and never report it as
+"no dependencies". With `fallbackReason` `not_indexed`, do not retry.
 
 **Branch C — Reverse-deps for named targets** ("who depends on lib X",
 "if I publish X who breaks", "blast radius of agent Y") — up to about
