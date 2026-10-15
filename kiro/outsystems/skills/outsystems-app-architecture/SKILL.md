@@ -403,7 +403,7 @@ Attr = { n, t, pk?, req?, len?, d?,
   only through actions, structures, blocks or themes can be missing, and
   even a listed kind is not proven complete; the page and your report
   must say which kinds were covered (unknown when `indexedKinds` is null)
-  and never present the list as complete. It does not apply to an `oml-fallback` answer.
+  and never present the list as complete. It does not apply to a `stored-xre` answer.
 - Built-in OutSystems modules are filtered out of `deps`. `deps` is
   empty when neither connections nor refs were available; the template
   hides the Dependencies layer then.

@@ -6,8 +6,9 @@ Runnable two ways:
     pytest tests/skills/app-architecture/   # discovered as test_* functions
 
 Fixtures are app_refs payloads in the server's shape (schemaVersion 2,
-source context-service; names and keys invented) plus the legacy and
-oml-fallback shapes the parser must stay tolerant of.
+source context-service; schemaVersion 3, source stored-xre; names and keys
+invented) plus the legacy and oml-fallback shapes the parser must stay
+tolerant of.
 """
 from __future__ import annotations
 
@@ -103,6 +104,31 @@ def test_oml_fallback_importedkind_shape():
     assert deps[0]["k"] == "pk1"
     assert deps[0]["kind"] == "eSpace"
     assert deps[0]["cat"] == "Library"
+
+
+def test_stored_xre_importedkind_shape():
+    """schemaVersion 3 / stored-xre uses producerAsset* + importedKind, reports
+    indexedKinds as [], and names its revision when it is older than the newest."""
+    payload = {
+        "schemaVersion": 3,
+        "source": "stored-xre",
+        "assetKey": "stored",
+        "degraded": False,
+        "references": [
+            {"producerAssetKey": "pk1", "producerAssetName": "SomeLib", "importedKind": "Extension"},
+        ],
+        "indexedKinds": [],
+        "fallbackReason": "not_indexed",
+        "revision": 7,
+        "latestRevision": 8,
+    }
+    deps = _deps_for(payload)
+    assert len(deps) == 1
+    assert deps[0]["n"] == "SomeLib"
+    assert deps[0]["k"] == "pk1"
+    assert deps[0]["kind"] == "Extension"
+    assert deps[0]["cat"] == "Library"
+    assert build._refs_coverage(payload) == {"source": "stored-xre", "indexedKinds": []}
 
 
 def test_builtins_only_yields_empty():
