@@ -43,22 +43,17 @@ For large data: stream in chunks, use references/URLs instead of raw bytes.
 ## Project Setup
 
 ### Target Framework
-- Use **.NET 10**. Do **not** use .NET 6 or .NET 8 for new projects: ODC is ending .NET 8 support,
-  and after its end date ODC refuses to upload, update, or install custom code targeting it. The
-  ODC documentation page "Upgrading custom code libraries to a new .NET version" lists the dates.
+- Use **.NET 10** (available in ODC since 2026-06-22). Do **not** use .NET 6 or .NET 8 for new
+  projects — **.NET 8 support ends 2026-11-10**, after which ODC refuses to upload, update, or
+  install custom code targeting it.
 - Project type: **Class Library** (`<OutputType>Library</OutputType>`).
-- If the project is on an older .NET version, update it to the latest version.
+- If the project is on an older .net version update to the latest version.
 
-### Required NuGet Packages
+### Required NuGet Package
 ```xml
 <PackageReference Include="OutSystems.ExternalLibraries.SDK" Version="1.7.0" />
-<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.12" />
 ```
-Always use the latest stable versions. Check: https://www.nuget.org/packages/OutSystems.ExternalLibraries.SDK
-
-The SDK package brings no other dependencies, so the logging package is needed for the `ILogger`
-the library class receives (see [Logging](#logging)). Without it, `using Microsoft.Extensions.Logging;`
-does not compile.
+Always use the latest stable version. Check: https://www.nuget.org/packages/OutSystems.ExternalLibraries.SDK
 
 ### Minimal `.csproj`
 ```xml
@@ -70,7 +65,6 @@ does not compile.
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="OutSystems.ExternalLibraries.SDK" Version="1.7.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.12" />
   </ItemGroup>
 </Project>
 ```
@@ -103,7 +97,7 @@ namespace MyCompany.MyLibrary
 }
 ```
 
-- `Name`: The library name visible in ODC Portal. Required for ODC Forge submission. Uploading a library with a `Name` that already exists in the tenant creates a new revision of that library, not a new library.
+- `Name`: The library name visible in ODC Portal. Required for ODC Forge submission.
 - `Description`: Shown in ODC Portal. Required for Forge submission.
 - `IconResourceName`: Embedded resource path. Required for Forge submission.
 
@@ -190,7 +184,7 @@ calculation"*.
 ---
 
 ## Logging
-To log your custom code and generate detailed logs including informational messages and errors, you must use the Microsoft.Extensions.Logging ILogger interface in your C# code. The library class receives the `ILogger` in its constructor; the `Microsoft.Extensions.Logging` package must be referenced (see [Required NuGet Packages](#required-nuget-packages)). Don't use `Console.WriteLine`. Only Information and higher levels show in the ODC Portal logs.
+To log your custom code and generate detailed logs including informational messages and errors, you must use the Microsoft.Extensions.Logging ILogger interface in your C# code. The library class receives the `ILogger` in its constructor. The OutSystems SDK package doesn't bring it, so add the `Microsoft.Extensions.Logging` package (`<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.12" />`). It adds about 180 KB of Microsoft DLLs to the upload ZIP, so add it only when the library logs.
 
 ```csharp
 using Microsoft.Extensions.Logging;
@@ -210,7 +204,7 @@ namespace MyCompany.MyLibrary
         public string SayHello(string name)
         {
             using var activity = Activity.Current?.Source.StartActivity("MyLibrary.SayHello");
-            _logger.LogInformation("Saying hello to {Name}", name);
+            _logger.LogInformation($"Saying hello to {name}");
             return $"Hello, {name}";
         }
     }
@@ -281,6 +275,7 @@ Keep the test projects next to the library project, not inside its folder: a pro
 
 ```
 MyLibrary.sln
+global.json                    # opts `dotnet test` into Microsoft.Testing.Platform (see Unit Tests)
 MyLibrary/
 ├── MyLibrary.csproj
 ├── Interfaces/
@@ -320,19 +315,10 @@ namespace MyCompany.MyLibrary
 }
 
 // Implementations/MyLibrary.cs
-using Microsoft.Extensions.Logging;
-
 namespace MyCompany.MyLibrary
 {
     public class MyLibrary : IMyLibrary
     {
-        private readonly ILogger _logger;
-
-        public MyLibrary(ILogger logger)
-        {
-            _logger = logger;
-        }
-
         public string Greet(string name) => $"Hello, {name}!";
     }
 }
@@ -365,7 +351,7 @@ Use standard .NET test frameworks. The library code has no ODC runtime dependenc
 
 <PackageReference Include="xunit.v3" Version="4.*" />
 <PackageReference Include="xunit.runner.visualstudio" Version="4.*" />
-<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.*" />
+<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
 <PackageReference Include="Moq" Version="4.*" />
 
 <ProjectReference Include="../MyLibrary/MyLibrary.csproj" />
@@ -375,20 +361,18 @@ xUnit v3 renames the package from `xunit` to `xunit.v3`. The Visual Studio / `do
 keeps its name, `xunit.runner.visualstudio`, but must be 3.0.0 or later; its 4.0.0 was released
 alongside `xunit.v3` 4.0.0.
 
-The library class takes an `ILogger`, so pass `NullLogger.Instance` in tests. Put the test class in
-a namespace under the library's, as below: xUnit v3 generates code under the test project's root
-namespace (`MyLibrary.UnitTests`), so in the global namespace `MyLibrary` would resolve to that
-namespace instead of the class.
+Put the test class in a namespace under the library's, as below: xUnit v3 generates code under the
+test project's root namespace (`MyLibrary.UnitTests`), so in the global namespace `MyLibrary` would
+resolve to that namespace instead of the class.
 
 ```csharp
-using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace MyCompany.MyLibrary.UnitTests
 {
     public class MyLibraryTests
     {
-        private readonly IMyLibrary _sut = new MyLibrary(NullLogger.Instance);
+        private readonly IMyLibrary _sut = new MyLibrary();
 
         [Fact]
         public void Greet_ReturnsExpectedString()
@@ -401,6 +385,18 @@ namespace MyCompany.MyLibrary.UnitTests
 ```
 
 Run: `dotnet test`
+
+On the .NET 10 SDK, `dotnet test` runs xUnit v3 tests only through Microsoft.Testing.Platform, so
+add a `global.json` at the solution root. Without it, `dotnet test` fails with "Testing with VSTest
+target is no longer supported by Microsoft.Testing.Platform on .NET 10 SDK and later".
+
+```json
+{
+  "test": {
+    "runner": "Microsoft.Testing.Platform"
+  }
+}
+```
 
 ### Integration Tests (Container)
 Integration tests should run the code in a container matching the ODC runtime environment.
@@ -457,8 +453,7 @@ dotnet publish MyLibrary/MyLibrary.csproj -c Release -r linux-x64 --self-contain
 ```
 
 Then zip the *contents* of `MyLibrary/bin/Release/net10.0/linux-x64/publish/` to the root of the ZIP.
-That ZIP is what you upload. Its root holds the library's `.dll` and `.deps.json` next to its
-dependencies, with no folder around them.
+That ZIP is what you upload.
 
 The ODC docs also give a portable form without `-r linux-x64`; the runtime-specific form above is
 the one they require when the library has runtime-specific dependencies. It is also the form
@@ -470,6 +465,8 @@ OutSystems' own public external-library repositories use (see [Worked Examples](
 ## Deploy
 
 Deploy with the main `outsystems` skill's "Publish a new external library" flow: upload the ZIP, poll until the library is ready for review (pull the operation logs on a validation failure), publish it, and poll until it is published. If the `outsystems` MCP server isn't connected, follow the main skill's setup for your harness.
+
+The upload sends the ZIP inside the request as base64 text, so keep it small: add only the packages the library uses.
 
 - **Uploading and publishing are tenant writes: confirm each one.** Before the upload, look up the tenant's external libraries (a read-only listing) for one with the same `[OSInterface]` `Name`. Then restate the upload ("upload the external library MyLibrary from MyLibrary.zip") and say whether it creates a new library or a new revision of the existing one, with that library's key. If the lookup can't tell, say so; don't guess. Wait for explicit confirmation. Before the publish, restate it ("publish the external library MyLibrary") and wait again. Don't offer to approve them in advance.
 - If the user declines the publish, the uploaded library stays unpublished; tell them, with the operation key.
@@ -487,6 +484,8 @@ disagree with its code, trust the code.
   (the `[OSInterface]` / `[OSAction]` surface, with optional nullable `[OSStructure]` parameters),
   `src/UltimatePDF_ExternalLogic/UltimatePDF_ExternalLogic.csproj` (`net10.0`), the unit, integration
   and live-tenant E2E test projects under `src/`, and `generate_upload_package.ps1` (publish + zip).
+  As of 2026-09-18 its `CONTRIBUTING.md` still says the project targets `net8.0`, which its `.csproj`
+  no longer does.
 - **Secondary, minimal — [OutSystems/vanguard-xml-to-json](https://github.com/OutSystems/vanguard-xml-to-json)**
   (MIT). One interface, one action, one structure: the smallest complete example
   (`XmlToJson/IXmlToJson.cs`, `XmlToJson/XmlToJson.csproj`, `XmlToJson/generate_upload_package.ps1`).
@@ -501,7 +500,6 @@ disagree with its code, trust the code.
 |---|---|---|
 | Interface not found | Implementing class not in same assembly | Ensure interface and class are in the same `.csproj` |
 | Unsupported type | Using `class` instead of `struct` for complex types | Use `struct` with `[OSStructure]` |
-| `ILogger` / `Microsoft.Extensions` not found at build | Logging package not referenced | Add the `Microsoft.Extensions.Logging` package (see [Required NuGet Packages](#required-nuget-packages)) |
 | ZIP structure wrong | Folder nested inside ZIP | Zip the *contents* of `/publish`, not the folder itself |
 | Payload too large | Input/output exceeds 5.5 MB | Chunk data, use URLs, or split into multiple actions |
 | `Server is busy, retry shortly` on upload | All upload slots on the server were busy | Transient, whatever error category it arrives with: retry the upload with backoff, as the main `outsystems` skill describes |
