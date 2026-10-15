@@ -33,6 +33,7 @@ BETA_DESCRIBED=(
   claude/skills/outsystems-app-architecture/SKILL.md
   claude/skills/outsystems-dependency-impact/SKILL.md
   claude/skills/outsystems-design-to-app/SKILL.md
+  claude/skills/outsystems-spec-driven-build/SKILL.md
   claude/skills/outsystems-tenant-architecture/SKILL.md
 )
 
@@ -50,6 +51,7 @@ for doc in "${DOCS[@]}"; do
   check_match "stops when the O11 server is missing" "$rule" 'start the MCP server in Service Studio and stop'
   check_match "keeps the platform for later requests" "$rule" 'treat later requests in this conversation as for that platform unless the user says otherwise\.$'
   scope=$(grep -F -- '**Scope.**' "$REPO_ROOT/$doc")
+  check "has one feedback Scope line" "$(printf '%s\n' "$scope" | grep -c .)" 1
   check_match "feedback Scope leaves out the O11 server" "$scope" 'Tools from the Service Studio MCP server \(named `servicestudio` in the O11 setup\) belong to OutSystems 11 \(O11\): never report on them\.'
   rule_hash=$(printf '%s' "$rule" | git hash-object --stdin)
   if [ -z "$rule_hash" ]; then
@@ -110,6 +112,7 @@ check "PowerShell replace at the heading, verbatim" "$(count "\`$PS_REPLACE_HEAD
 check "bash replace at the frontmatter, verbatim" "$(count "\`$BASH_REPLACE_FRONTMATTER\`" "$README")" 1
 check "PowerShell replace at the frontmatter, verbatim" "$(count "\`$PS_REPLACE_FRONTMATTER\`" "$README")" 1
 row=$(grep -F -- '| The agent works on ODC when you meant OutSystems 11 (O11)' "$README")
+check "has the troubleshooting row once" "$(printf '%s\n' "$row" | grep -c .)" 1
 check_match "troubleshooting row links the docs page" "$row" 'use_outsystems_mcp_in_odc_alongside_o11/\)'
 
 finish
