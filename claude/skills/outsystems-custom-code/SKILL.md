@@ -190,7 +190,7 @@ working. On `[OSInterface]` it's the previous namespace plus the previous librar
 ---
 
 ## Logging
-To log from your custom code, including informational messages and errors, use the Microsoft.Extensions.Logging ILogger interface in your C# code. Only Information and higher levels show in the ODC Portal logs. The library class receives the `ILogger` in its constructor. The OutSystems SDK package doesn't bring it, so add the `Microsoft.Extensions.Logging` package (`<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.12" />`). It adds about 180 KB of Microsoft DLLs to the upload ZIP, so add it only when the library logs.
+To log from your custom code, including informational messages and errors, use the Microsoft.Extensions.Logging ILogger interface in your C# code. Only Information and higher levels show in the ODC Portal logs. The library class receives the `ILogger` in its constructor. The OutSystems SDK package doesn't bring it, so add the `Microsoft.Extensions.Logging.Abstractions` package (`<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />`): it holds `ILogger`, `LogInformation` and `NullLogger`, which is all a library needs, because ODC creates the logger and passes it in. It adds about 60 KB of Microsoft DLLs to the upload ZIP, so add it only when the library logs. The ODC SDK README names the full `Microsoft.Extensions.Logging` package, which also works: it depends on this one and adds about 120 KB more for creating loggers, which a library doesn't do.
 
 The logging version of the `MyLibrary` class from the [Implementation Pattern](#implementation-pattern):
 
