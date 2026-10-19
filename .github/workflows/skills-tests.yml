@@ -3,8 +3,7 @@ name: skills-tests
 # Offline tests for the bundled Beta skills' scripts (tests/skills), plus the
 # check that the Cursor and Kiro copies match the Claude source, and the
 # platform-check suite from .github/tests (the O11 exclusions in the skill
-# docs and the README recipes for an existing O11 instructions file). Needs
-# no tenant and no secrets.
+# docs and the README troubleshooting row). Needs no tenant and no secrets.
 
 on:
   pull_request:
@@ -73,5 +72,5 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Check the platform rule, the skill descriptions and the README recipes
+      - name: Check the platform rule, the skill descriptions and the README troubleshooting row
         run: bash .github/tests/skill-platform-check.test.sh
