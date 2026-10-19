@@ -179,10 +179,12 @@ review silently instead of failing the job.
 .github/tests/run.sh
 ```
 
-Needs `bash`, `git`, `jq` and `python3` with PyYAML. Nothing invokes it
-automatically: this repo runs no CI beyond the review itself, so run it
-before pushing a change to `ai-review.yml`, to a skill doc, or to the
-Claude plugin's hook.
+Needs `bash`, `git`, `jq` and `python3` with PyYAML. No workflow invokes
+`run.sh` itself, so run it before pushing a change to `ai-review.yml`, to a
+skill doc, to the README, or to the Claude plugin's hook.
+`skills-tests.yml` runs one of its suites, `skill-platform-check.test.sh`, on
+its own, on pull requests that touch the skill docs, the README, `lib.sh` or
+that suite; the same workflow also runs the Beta skills' Python suites.
 
 The step suites extract the `run:` bodies from the committed workflow and
 execute them under the command the shell each step declares expands to.
@@ -251,6 +253,17 @@ the suites pin down:
   command names stays plain shell, as the plugin directory's validator
   requires, and a checkout made with `core.autocrlf=true`, Git for
   Windows' default, still gets the script with LF line endings.
+- `skill-withheld-graph.test.sh` - the Caveats bullet for a deployment
+  that does not serve the app model graph, byte-identical in the five skill
+  docs, and the matching refusal rule in Branch B of the dependency-impact
+  skill, so an agent never reports that refusal as no dependencies.
+- `skill-platform-check.test.sh` - the "Platform first" Rules bullet,
+  byte-identical in the five skill docs; the main skill description
+  (claude, cursor, kiro) naming ODC and ruling out O11; the O11 exclusion at
+  the end of each Beta skill description (the Cursor and Kiro copies are
+  covered by `tests/skills/test_harness_copies.py`); the feedback Scope
+  sentence that leaves out the Service Studio MCP server; and the README
+  troubleshooting row for a request that lands on the wrong platform.
 
 A case that needs `gh` behaviour the stub does not have belongs in the
 stub, not in a mock of the step: a test that reimplements the step
