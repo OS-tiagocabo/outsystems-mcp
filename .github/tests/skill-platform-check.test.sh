@@ -31,6 +31,7 @@ MAIN_DESCRIBED=(
 
 BETA_DESCRIBED=(
   claude/skills/outsystems-app-architecture/SKILL.md
+  claude/skills/outsystems-custom-code/SKILL.md
   claude/skills/outsystems-dependency-impact/SKILL.md
   claude/skills/outsystems-design-to-app/SKILL.md
   claude/skills/outsystems-spec-driven-build/SKILL.md
