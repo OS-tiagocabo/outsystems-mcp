@@ -44,6 +44,7 @@ for doc in "${DOCS[@]}"; do
   check_match "names the O11 server by role, not only by name" "$rule" 'the Service Studio MCP server \(named `servicestudio` in the O11 setup\)'
   check_match "asks when the platform is unclear" "$rule" 'Is this for ODC, or for the O11 module open in Service Studio\?'
   check_match "stops when the O11 server is missing" "$rule" 'start the MCP server in Service Studio and stop'
+  check_match "an ODC request that only mentions O11 is for ODC" "$rule" 'A request for work on ODC that only mentions O11, for example recreating an O11 entity in an ODC app, is for ODC\.'
   check_match "keeps the platform for later requests" "$rule" 'treat later requests in this conversation as for that platform unless the user says otherwise\.$'
   scope=$(grep -F -- '**Scope.**' "$REPO_ROOT/$doc")
   check "has one feedback Scope line" "$(printf '%s\n' "$scope" | grep -c .)" 1
