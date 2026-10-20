@@ -1,6 +1,6 @@
 ---
 name: outsystems
-description: "OutSystems Developer Cloud (ODC) over MCP. Edit apps, publish, deploy, search tenant elements, manage external libraries. Use for ANY OutSystems task on ODC. Not for OutSystems 11 (O11) modules open in Service Studio. When the Service Studio (O11) MCP server is also connected, confirm the platform before the first call."
+description: "OutSystems Developer Cloud (ODC) over MCP. Edit apps, publish, deploy, search tenant elements, manage external libraries. Load this skill before calling any tool from the OutSystems ODC MCP server, including read-only calls such as listing apps. Use for ANY OutSystems task on ODC. Not for OutSystems 11 (O11) modules open in Service Studio. When the Service Studio (O11) MCP server is also connected and the request names neither ODC nor O11, ask the user which platform before calling any OutSystems tool."
 ---
 
 # OutSystems - Remote MCP
@@ -9,7 +9,7 @@ You are connected to OutSystems Developer Cloud (ODC) over the MCP HTTP transpor
 
 **Once authenticated and the server's tools are visible**, read the live `tools/list` before your first non-auth OutSystems operation. This skill names domains, not tools — names, parameters, and defaults can change server-side, and the server is the source of truth. (Authenticating is the one exception: drive the auth flow first, as described below.)
 
-**Platform check, only when both OutSystems MCP servers are connected.** This server is for OutSystems Developer Cloud (ODC). When tools from the Service Studio MCP server (O11, named `servicestudio` in the O11 setup) are also visible in this session, check what the request names before your first call to this server, read-only calls such as listing apps included: if it names ODC, an ODC app or the tenant, go ahead on ODC; if it names O11, an O11 module or the module open in Service Studio, don't use this server; if it names neither, as in "my app", ask "Is this for ODC, or for the O11 module open in Service Studio?" and wait for the answer before calling any tool. When only this server is connected, skip this check and go ahead as usual.
+**Platform check, only when both OutSystems MCP servers are connected.** This server is for OutSystems Developer Cloud (ODC). When tools from the Service Studio MCP server (O11, named `servicestudio` in the O11 setup) are also visible in this session, you MUST decide the platform before your first call to this server, read-only calls such as listing apps included: if the request names ODC, an ODC app or the tenant, go ahead on ODC; if it names O11, an O11 module or the module open in Service Studio, don't use this server; if it names neither, as in "my app", ask "Is this for ODC, or for the O11 module open in Service Studio?" and wait for the answer before calling any tool. When only this server is connected, skip this check and go ahead as usual.
 
 ## First use / setup
 

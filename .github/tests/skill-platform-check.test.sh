@@ -55,6 +55,7 @@ for doc in "${DOCS[@]}"; do
   first_section=$(grep -n '^## ' "$REPO_ROOT/$doc" | head -1 | cut -d: -f1)
   check "platform check comes before the first section" "$([ -n "$gate_line" ] && [ "$gate_line" -lt "$first_section" ] && echo yes || echo no)" yes
   check_match "platform check applies only when both servers are connected" "$gate" 'When tools from the Service Studio MCP server \(O11, named `servicestudio` in the O11 setup\) are also visible in this session'
+  check_match "platform check is a firm first step" "$gate" 'you MUST decide the platform before your first call to this server'
   check_match "platform check covers read-only calls" "$gate" 'read-only calls such as listing apps included'
   check_match "platform check asks when the request names neither" "$gate" 'if it names neither, as in "my app", ask "Is this for ODC, or for the O11 module open in Service Studio\?" and wait for the answer before calling any tool\.'
   check_match "platform check is skipped with one server" "$gate" 'When only this server is connected, skip this check and go ahead as usual\.$'
@@ -74,7 +75,7 @@ for doc in "${DOCS[@]}"; do
 done
 
 section "skill descriptions"
-main_description='description: "OutSystems Developer Cloud (ODC) over MCP. Edit apps, publish, deploy, search tenant elements, manage external libraries. Use for ANY OutSystems task on ODC. Not for OutSystems 11 (O11) modules open in Service Studio. When the Service Studio (O11) MCP server is also connected, confirm the platform before the first call."'
+main_description='description: "OutSystems Developer Cloud (ODC) over MCP. Edit apps, publish, deploy, search tenant elements, manage external libraries. Load this skill before calling any tool from the OutSystems ODC MCP server, including read-only calls such as listing apps. Use for ANY OutSystems task on ODC. Not for OutSystems 11 (O11) modules open in Service Studio. When the Service Studio (O11) MCP server is also connected and the request names neither ODC nor O11, ask the user which platform before calling any OutSystems tool."'
 for doc in "${MAIN_DESCRIBED[@]}"; do
   check "$doc names ODC and rules out O11" "$(grep -m1 '^description: ' "$REPO_ROOT/$doc")" "$main_description"
 done
