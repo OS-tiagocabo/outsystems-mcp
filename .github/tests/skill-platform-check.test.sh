@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # The platform check for customers who connect both the OutSystems 11 (O11)
 # and the ODC MCP servers. Pins:
-# - the "Platform first" Rules bullet: once in each of the five lockstepped
-#   skill docs and byte-identical across them, and the feedback Scope
-#   sentence that leaves out the O11 server;
+# - the platform check near the top of each of the five lockstepped skill
+#   docs, which applies only when both servers are connected: once per doc,
+#   ahead of the first section, byte-identical across them;
+# - the "Platform first" Rules bullet: once in each doc and byte-identical
+#   across them, and the feedback Scope sentence that leaves out the O11 server;
 # - the main skill description (claude, cursor, kiro), identical in the three,
 #   and the O11 exclusion at the end of each Beta skill description (the
 #   Cursor and Kiro copies of the Beta skills are covered by
@@ -37,15 +39,28 @@ BETA_DESCRIBED=(
 )
 
 first_rule_hash=""
+first_gate_hash=""
 for doc in "${DOCS[@]}"; do
   section "$doc"
   rule=$(grep -F -- '- **Platform first.**' "$REPO_ROOT/$doc")
   check "has the Platform first rule once" "$(printf '%s\n' "$rule" | grep -c .)" 1
   check_match "names the O11 server by role, not only by name" "$rule" 'the Service Studio MCP server \(named `servicestudio` in the O11 setup\)'
-  check_match "asks when the platform is unclear" "$rule" 'Is this for ODC, or for the O11 module open in Service Studio\?'
+  check_match "points to the platform check when both servers are connected" "$rule" 'When both servers are connected, run the platform check at the top of this skill before your first call\.'
   check_match "stops when the O11 server is missing" "$rule" 'start the MCP server in Service Studio and stop'
   check_match "an ODC request that only mentions O11 is for ODC" "$rule" 'A request for work on ODC that only mentions O11, for example recreating an O11 entity in an ODC app, is for ODC\.'
   check_match "keeps the platform for later requests" "$rule" 'treat later requests in this conversation as for that platform unless the user says otherwise\.$'
+  gate=$(grep -F -- '**Platform check, only when both OutSystems MCP servers are connected.**' "$REPO_ROOT/$doc")
+  check "has the platform check once" "$(printf '%s\n' "$gate" | grep -c .)" 1
+  gate_line=$(grep -nF -- '**Platform check, only when both OutSystems MCP servers are connected.**' "$REPO_ROOT/$doc" | cut -d: -f1)
+  first_section=$(grep -n '^## ' "$REPO_ROOT/$doc" | head -1 | cut -d: -f1)
+  check "platform check comes before the first section" "$([ -n "$gate_line" ] && [ "$gate_line" -lt "$first_section" ] && echo yes || echo no)" yes
+  check_match "platform check applies only when both servers are connected" "$gate" 'When tools from the Service Studio MCP server \(O11, named `servicestudio` in the O11 setup\) are also visible in this session'
+  check_match "platform check covers read-only calls" "$gate" 'read-only calls such as listing apps included'
+  check_match "platform check asks when the request names neither" "$gate" 'if it names neither, as in "my app", ask "Is this for ODC, or for the O11 module open in Service Studio\?" and wait for the answer before calling any tool\.'
+  check_match "platform check is skipped with one server" "$gate" 'When only this server is connected, skip this check and go ahead as usual\.$'
+  gate_hash=$(printf '%s' "$gate" | git hash-object --stdin)
+  [ -n "$first_gate_hash" ] || first_gate_hash=$gate_hash
+  check "platform check is byte-identical to ${DOCS[0]}" "$gate_hash" "$first_gate_hash"
   scope=$(grep -F -- '**Scope.**' "$REPO_ROOT/$doc")
   check "has one feedback Scope line" "$(printf '%s\n' "$scope" | grep -c .)" 1
   check_match "feedback Scope leaves out the O11 server" "$scope" 'Tools from the Service Studio MCP server \(named `servicestudio` in the O11 setup\) belong to OutSystems 11 \(O11\): never report on them\.'
@@ -59,7 +74,7 @@ for doc in "${DOCS[@]}"; do
 done
 
 section "skill descriptions"
-main_description='description: "OutSystems Developer Cloud (ODC) over MCP. Edit apps, publish, deploy, search tenant elements, manage external libraries. Use for ANY OutSystems task on ODC. Not for OutSystems 11 (O11) modules open in Service Studio."'
+main_description='description: "OutSystems Developer Cloud (ODC) over MCP. Edit apps, publish, deploy, search tenant elements, manage external libraries. Use for ANY OutSystems task on ODC. Not for OutSystems 11 (O11) modules open in Service Studio. When the Service Studio (O11) MCP server is also connected, confirm the platform before the first call."'
 for doc in "${MAIN_DESCRIBED[@]}"; do
   check "$doc names ODC and rules out O11" "$(grep -m1 '^description: ' "$REPO_ROOT/$doc")" "$main_description"
 done
