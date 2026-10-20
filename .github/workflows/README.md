@@ -257,8 +257,14 @@ the suites pin down:
   that does not serve the app model graph, byte-identical in the five skill
   docs, and the matching refusal rule in Branch B of the dependency-impact
   skill, so an agent never reports that refusal as no dependencies.
-- `skill-platform-check.test.sh` - the "Platform first" Rules bullet,
-  byte-identical in the five skill docs; the main skill description
+- `skill-platform-check.test.sh` - the platform check near the top of the
+  five skill docs (the block that opens with "Platform check, only when both
+  OutSystems MCP servers are connected"), once per doc ahead of the first
+  section, byte-identical across them, and each of its lines; the sentences
+  in the "Go straight to the task", "Never guess opaque IDs" and "Confirm
+  before tenant-state mutations" Rules bullets that keep those rules from
+  overriding it; the "Platform first" Rules bullet, byte-identical in the
+  five skill docs; the main skill description
   (claude, cursor, kiro) naming ODC and ruling out O11; the O11 exclusion at
   the end of each Beta skill description (the Cursor and Kiro copies are
   covered by `tests/skills/test_harness_copies.py`); the feedback Scope

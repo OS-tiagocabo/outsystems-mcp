@@ -51,6 +51,7 @@ for doc in "${DOCS[@]}"; do
   check_match "keeps the platform for later requests" "$rule" 'treat later requests in this conversation as for that platform unless the user says otherwise\.$'
   gate=$(sed -n '/^\*\*Platform check, only when both OutSystems MCP servers are connected\.\*\*/,/^When only this server is connected/p' "$REPO_ROOT/$doc")
   check "has the platform check once" "$(grep -cF -- '**Platform check, only when both OutSystems MCP servers are connected.**' "$REPO_ROOT/$doc")" 1
+  check "platform check's closing line appears once" "$(grep -c '^When only this server is connected' "$REPO_ROOT/$doc")" 1
   gate_line=$(grep -nF -- '**Platform check, only when both OutSystems MCP servers are connected.**' "$REPO_ROOT/$doc" | cut -d: -f1)
   first_section=$(grep -n '^## ' "$REPO_ROOT/$doc" | head -1 | cut -d: -f1)
   check "platform check comes before the first section" "$([ -n "$gate_line" ] && [ "$gate_line" -lt "$first_section" ] && echo yes || echo no)" yes
@@ -64,6 +65,10 @@ for doc in "${DOCS[@]}"; do
   check_match "platform check does not ask again once the platform is known" "$gate" "Once you know the platform for certain, because the request named it, the user answered, or earlier turns in this conversation settled it, don't ask again for later requests; ask again only when a request points to the other platform\\.$"
   check_match "platform check is skipped with one server" "$gate" 'When only this server is connected, skip this check and go ahead as usual\.$'
   gate_hash=$(printf '%s' "$gate" | git hash-object --stdin)
+  if [ -z "$gate_hash" ]; then
+    echo "git hash-object returned nothing for $doc" >&2
+    exit 1
+  fi
   [ -n "$first_gate_hash" ] || first_gate_hash=$gate_hash
   check "platform check is byte-identical to ${DOCS[0]}" "$gate_hash" "$first_gate_hash"
   check_match "Go straight to the task does not skip the platform check" "$(grep -F -- '- **Go straight to the task.**' "$REPO_ROOT/$doc")" 'The platform check at the top of this skill is not a setup check: when both OutSystems MCP servers are connected, it comes before anything else\.$'
