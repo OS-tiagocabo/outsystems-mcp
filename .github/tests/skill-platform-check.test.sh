@@ -61,10 +61,14 @@ for doc in "${DOCS[@]}"; do
   check_match "platform check routes a request that names ODC" "$gate" '^- The request names ODC, an ODC app or the tenant: go ahead on ODC\.$'
   check_match "platform check routes a request that names O11" "$gate" "^- The request names O11, an O11 module or the module open in Service Studio: don't use this server\.$"
   check_match "platform check asks when the request names neither" "$gate" '^- The request names neither, as in "my app": you MUST ask the user "Is this for ODC, or for the O11 module open in Service Studio\?" and wait for the answer before calling any tool\.$'
+  check_match "platform check does not ask again once the platform is known" "$gate" "Once you know the platform for certain, because the request named it, the user answered, or earlier turns in this conversation settled it, don't ask again for later requests; ask again only when a request points to the other platform\\.$"
   check_match "platform check is skipped with one server" "$gate" 'When only this server is connected, skip this check and go ahead as usual\.$'
   gate_hash=$(printf '%s' "$gate" | git hash-object --stdin)
   [ -n "$first_gate_hash" ] || first_gate_hash=$gate_hash
   check "platform check is byte-identical to ${DOCS[0]}" "$gate_hash" "$first_gate_hash"
+  check_match "Go straight to the task does not skip the platform check" "$(grep -F -- '- **Go straight to the task.**' "$REPO_ROOT/$doc")" 'The platform check at the top of this skill is not a setup check: when both OutSystems MCP servers are connected, it comes before anything else\.$'
+  check_match "Never guess opaque IDs settles the platform first" "$(grep -F -- '- **Never guess opaque IDs.**' "$REPO_ROOT/$doc")" 'When both OutSystems MCP servers are connected, settle the platform first, as the platform check says, before you try to resolve an ID or name\.$'
+  check_match "read-only exemption does not override the platform check" "$(grep -F -- '- **Confirm before tenant-state mutations.**' "$REPO_ROOT/$doc")" "The read-only exemption above doesn't override the platform check: with both OutSystems MCP servers connected, a read-only call still waits until the platform is settled\\.$"
   scope=$(grep -F -- '**Scope.**' "$REPO_ROOT/$doc")
   check "has one feedback Scope line" "$(printf '%s\n' "$scope" | grep -c .)" 1
   check_match "feedback Scope leaves out the O11 server" "$scope" 'Tools from the Service Studio MCP server \(named `servicestudio` in the O11 setup\) belong to OutSystems 11 \(O11\): never report on them\.'
