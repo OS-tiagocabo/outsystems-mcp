@@ -9,7 +9,13 @@ You are connected to OutSystems Developer Cloud (ODC) over the MCP HTTP transpor
 
 **Once authenticated and the server's tools are visible**, read the live `tools/list` before your first non-auth OutSystems operation. This skill names domains, not tools — names, parameters, and defaults can change server-side, and the server is the source of truth. (Authenticating is the one exception: drive the auth flow first, as described below.)
 
-**Platform check, only when both OutSystems MCP servers are connected.** This server is for OutSystems Developer Cloud (ODC). When tools from the Service Studio MCP server (O11, named `servicestudio` in the O11 setup) are also visible in this session, you MUST decide the platform before your first call to this server, read-only calls such as listing apps included: if the request names ODC, an ODC app or the tenant, go ahead on ODC; if it names O11, an O11 module or the module open in Service Studio, don't use this server; if it names neither, as in "my app", ask "Is this for ODC, or for the O11 module open in Service Studio?" and wait for the answer before calling any tool. When only this server is connected, skip this check and go ahead as usual.
+**Platform check, only when both OutSystems MCP servers are connected.** This server is for OutSystems Developer Cloud (ODC). When tools from the Service Studio MCP server (O11, named `servicestudio` in the O11 setup) are also visible in this session, you MUST decide the platform before your first call to this server, read-only calls such as listing apps included. With both servers connected, **you can't know which platform a request is for unless it names one, so never guess**:
+
+- The request names ODC, an ODC app or the tenant: go ahead on ODC.
+- The request names O11, an O11 module or the module open in Service Studio: don't use this server.
+- The request names neither, as in "my app": you MUST ask the user "Is this for ODC, or for the O11 module open in Service Studio?" and wait for the answer before calling any tool.
+
+When only this server is connected, skip this check and go ahead as usual.
 
 ## First use / setup
 

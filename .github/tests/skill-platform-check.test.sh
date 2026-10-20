@@ -49,15 +49,18 @@ for doc in "${DOCS[@]}"; do
   check_match "stops when the O11 server is missing" "$rule" 'start the MCP server in Service Studio and stop'
   check_match "an ODC request that only mentions O11 is for ODC" "$rule" 'A request for work on ODC that only mentions O11, for example recreating an O11 entity in an ODC app, is for ODC\.'
   check_match "keeps the platform for later requests" "$rule" 'treat later requests in this conversation as for that platform unless the user says otherwise\.$'
-  gate=$(grep -F -- '**Platform check, only when both OutSystems MCP servers are connected.**' "$REPO_ROOT/$doc")
-  check "has the platform check once" "$(printf '%s\n' "$gate" | grep -c .)" 1
+  gate=$(sed -n '/^\*\*Platform check, only when both OutSystems MCP servers are connected\.\*\*/,/^When only this server is connected/p' "$REPO_ROOT/$doc")
+  check "has the platform check once" "$(grep -cF -- '**Platform check, only when both OutSystems MCP servers are connected.**' "$REPO_ROOT/$doc")" 1
   gate_line=$(grep -nF -- '**Platform check, only when both OutSystems MCP servers are connected.**' "$REPO_ROOT/$doc" | cut -d: -f1)
   first_section=$(grep -n '^## ' "$REPO_ROOT/$doc" | head -1 | cut -d: -f1)
   check "platform check comes before the first section" "$([ -n "$gate_line" ] && [ "$gate_line" -lt "$first_section" ] && echo yes || echo no)" yes
   check_match "platform check applies only when both servers are connected" "$gate" 'When tools from the Service Studio MCP server \(O11, named `servicestudio` in the O11 setup\) are also visible in this session'
   check_match "platform check is a firm first step" "$gate" 'you MUST decide the platform before your first call to this server'
   check_match "platform check covers read-only calls" "$gate" 'read-only calls such as listing apps included'
-  check_match "platform check asks when the request names neither" "$gate" 'if it names neither, as in "my app", ask "Is this for ODC, or for the O11 module open in Service Studio\?" and wait for the answer before calling any tool\.'
+  check_match "platform check says the agent can't tell which platform" "$gate" "you can't know which platform a request is for unless it names one, so never guess"
+  check_match "platform check routes a request that names ODC" "$gate" '^- The request names ODC, an ODC app or the tenant: go ahead on ODC\.$'
+  check_match "platform check routes a request that names O11" "$gate" "^- The request names O11, an O11 module or the module open in Service Studio: don't use this server\.$"
+  check_match "platform check asks when the request names neither" "$gate" '^- The request names neither, as in "my app": you MUST ask the user "Is this for ODC, or for the O11 module open in Service Studio\?" and wait for the answer before calling any tool\.$'
   check_match "platform check is skipped with one server" "$gate" 'When only this server is connected, skip this check and go ahead as usual\.$'
   gate_hash=$(printf '%s' "$gate" | git hash-object --stdin)
   [ -n "$first_gate_hash" ] || first_gate_hash=$gate_hash
