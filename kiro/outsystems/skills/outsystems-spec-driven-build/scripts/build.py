@@ -714,7 +714,8 @@ def _read_run(raw) -> dict:
     if isinstance(error, dict):
         error = error.get("message") or json.dumps(error)
     validation = result.get("validation") or last.get("validation") or {}
-    asset_facts = result.get("assetFacts") or result.get("asset_facts") or []
+    asset_facts = (result["assetFacts"] if "assetFacts" in result
+                   else result.get("asset_facts", []))
     return {
         "run_id": str(last.get("runId") or ""),
         "status": str(last.get("status") or "unknown"),

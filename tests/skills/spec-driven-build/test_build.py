@@ -974,6 +974,10 @@ OTHER_BAD = {"assetKey": "b0000002", "attemptedChange": True, "changeApplied": F
      "the change was not applied on asset b0000002"),
     (_facts(dict(OWN_OK, assetKey="c0000003")), True, "succeeded, no validation errors"),
     (dict(LANDED, result={"assetFacts": []}), True, "succeeded, no validation errors"),
+    (dict(LANDED, result={"assetFacts": [], "asset_facts": [OTHER_BAD]}), True,
+     "succeeded, no validation errors"),
+    (dict(LANDED, result={"asset_facts": [OTHER_BAD]}), False,
+     "the change was not applied on asset b0000002"),
 ])
 def test_per_asset_facts_are_read_for_the_app_key(tmp_path, result, landed, reason):
     p, text = report(tmp_path, result)
