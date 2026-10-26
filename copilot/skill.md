@@ -187,7 +187,7 @@ An app's references list the producers the Context Service records as referenced
 4. Publish the operation with that same operation key, then poll the status until `Published`.
 
 **Reference an external library from an app:**
-- Just ask mentor: in a mentor session on the app, prompt "Use the <ActionName> action from <LibraryName> in <screen edit>.", then poll the run as usual.
+- Just ask mentor: prompt "Use the <ActionName> action from <LibraryName> in <screen edit>." with the app's key in the prompt's asset references, then poll the run as usual.
 
 **Run a deployment-impact analysis:**
 1. Start the impact analysis with the asset key and `env_key`. If the launch fails because the asset has no deployment to analyse, tell the user and ask before publishing it (unless its type can never qualify); do not switch to `delete: true` to get past it (see Caveats).

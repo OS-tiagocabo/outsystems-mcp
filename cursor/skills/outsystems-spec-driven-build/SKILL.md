@@ -151,7 +151,7 @@ The output is the Mentor turn for part 2: the whole spec, then the screen guardr
 
 Send it on the **same session**, unchanged, and handle it as in part 1: poll, save the terminal result to `<work>/result-screens.json`, render the report with every build and fix turn so far, not the publish turns (`--result "<work>/result-data.json" --label data --result "<work>/result-screens.json" --label screens`, plus any fix turns, in order), check that Mentor didn't publish on its own, and send one fix turn if it didn't land; if that one didn't land either, stop as in Step 5, item 3. Then **publish part 2**.
 
-> **Don't cancel a turn whose work you want:** its in-flight edits may not land. If a turn fails or times out, retry in the same session as the main `outsystems` skill describes: raise the turn-time ceiling where the catalog offers one; otherwise send a follow-up turn that asks Mentor to finish only what is still missing from this part, reusing what it already built. This retry is the part's one fix turn (Step 5, item 3). If the session ended after part 1 was published, open a new session on the same `app_key` and send part 2 there.
+> **Don't cancel a turn whose work you want:** its in-flight edits may not land. If a turn fails or times out, retry in the same session as the main `outsystems` skill describes: raise the turn-time ceiling where the catalog offers one; otherwise send a follow-up turn that asks Mentor to finish only what is still missing from this part, reusing what it already built. This retry is the part's one fix turn (Step 5, item 3). If the session ended after part 1 was published, open a new session and reference the same `app_key` in its asset references, then send part 2 there.
 
 ### Publishing (after each part)
 
