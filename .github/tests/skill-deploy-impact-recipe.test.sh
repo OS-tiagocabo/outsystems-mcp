@@ -131,7 +131,7 @@ for doc in "${DOCS[@]}"; do
   check "keeps the run-first clause once" \
     "$(printf '%s' "$rules" | grep -oF 'run it *before* you ask for confirmation' | wc -l | tr -d ' ')" 1
   check_match "keeps the destructive-action list" "$rules" \
-    'starting or rolling back a deployment, publishing OML, uploading/publishing/deleting an external library, and creating an app\.'
+    'starting or rolling back a deployment, publishing OML, uploading/publishing/deleting an external library, and creating an app \(a mentor turn that asks Mentor to create one\)\.'
   check_match "keeps the deletion-impact confirm-first rule" \
     "$rules" 'name the asset you are about to analyse and get confirmation first'
   check_match "keeps the mentor-session exemption" \

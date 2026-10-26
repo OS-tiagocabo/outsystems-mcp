@@ -98,11 +98,11 @@ This go/no-go covers the Mentor edits only. **Each tenant write gets its own con
 
 The live tool catalog decides which calls do each step; field names below follow the tool schemas. "The app name" below is the Step 1 app name.
 
-- **Existing app** (an empty app the user created in ODC Studio and published once): search the tenant's apps by name and pick the result whose name is exactly the app name (ask the user if several match); its key is `app_key`. Open one Mentor session and load the app into it.
+- **Existing app** (an empty app the user created in ODC Studio and published once): search the tenant's apps by name and pick the result whose name is exactly the app name (ask the user if several match); its key is `app_key`. Open one Mentor session and pass `app_key` in the asset references of every Mentor prompt below.
 - **New app.** First search the tenant's apps for one with that name: apps can't be deleted through this server, so a retry must not leave duplicates behind. The search only sees **published** apps, though: a new app shows up in the app listing, app info and the context lookups only after its first publish. So **never repeat a creation whose result you didn't see**; if the app key or session was lost before the first publish, ask the user to check ODC Studio before creating again.
-  - **Creating an app is a tenant write: restate it ("create a new Web app named X in portfolio Y, from the standard template") and wait for explicit confirmation.** Then open one Mentor session and create the app in it from the standard Web application template, as the main `outsystems` skill describes, with the confirmed `name` and `portfolioKey`. Keep the new app's key as `app_key`.
-  - **Portfolio:** use the portfolio the user names, or the one their existing apps belong to (the detailed app listing shows each app's portfolio key), and state it in the creation question; never guess one. If the create call is refused, read the error and supply what it asks for.
-- **Fallback** when creation fails: ask the user to create the app in ODC Studio and publish it once there, then find it by name and load it.
+  - **Creating an app is a tenant write: restate it ("create a new Web app named X in portfolio Y, from the standard template") and wait for explicit confirmation.** Then open one Mentor session and send the creation as a Mentor turn of its own, as the main `outsystems` skill describes: "Create a new Web application named X in portfolio Y from the standard Web application template. Do nothing else." Poll it to terminal and keep the new app's key from the run's per-app facts as `app_key`; pass it in the asset references of every Mentor prompt below.
+  - **Portfolio:** use the portfolio the user names, or the one their existing apps belong to (the detailed app listing shows each app's portfolio key), and state it in the creation question and the creation prompt; never guess one. If Mentor refuses the creation, read the run's answer and supply what it asks for.
+- **Fallback** when the creation run fails or times out: a run can create the app and then fail, so first read its per-app facts; if they show an app was created, keep that key as `app_key` and continue. Only if they show no app was created, ask the user to create the app in ODC Studio and publish it once there, then find it by name and use its key as `app_key`.
 
 Use **this one session for both parts and their publishes** (main `outsystems` skill). Its idle limit applies while you wait on the user.
 
@@ -121,7 +121,7 @@ The output is the Mentor turn for part 1: the spec's data sections (overview, ro
 
 Send it as one Mentor turn on the session, unchanged: don't rewrite or drop the guardrails. Then:
 
-1. **Poll the run to terminal** and read its completion signals **as the main `outsystems` skill describes**; save the terminal result to `<work>/result-data.json` (one replay of the run read from cursor 0, not the poll pages, so the summary isn't counted twice). Render the report, which records whether the turn landed:
+1. **Poll the run to terminal** and read its completion signals for `app_key` **as the main `outsystems` skill describes**; save the terminal result to `<work>/result-data.json` (one replay of the run read from cursor 0, not the poll pages, so the summary isn't counted twice). Render the report, which records whether the turn landed:
 
    ```bash
    python3 "<skill>/scripts/build.py" render-report --spec "<work>/spec.md" --result "<work>/result-data.json" --label data --app-key "<app_key>" --output "<work>/build-report.md"
@@ -151,7 +151,7 @@ The output is the Mentor turn for part 2: the whole spec, then the screen guardr
 
 Send it on the **same session**, unchanged, and handle it as in part 1: poll, save the terminal result to `<work>/result-screens.json`, render the report with every build and fix turn so far, not the publish turns (`--result "<work>/result-data.json" --label data --result "<work>/result-screens.json" --label screens`, plus any fix turns, in order), check that Mentor didn't publish on its own, and send one fix turn if it didn't land; if that one didn't land either, stop as in Step 5, item 3. Then **publish part 2**.
 
-> **Don't cancel a turn whose work you want:** its in-flight edits may not land. If a turn fails or times out, retry in the same session as the main `outsystems` skill describes: raise the turn-time ceiling where the catalog offers one; otherwise send a follow-up turn that asks Mentor to finish only what is still missing from this part, reusing what it already built. This retry is the part's one fix turn (Step 5, item 3). If the session ended after part 1 was published, open a new session on the same `app_key` and send part 2 there.
+> **Don't cancel a turn whose work you want:** its in-flight edits may not land. If a turn fails or times out, retry in the same session as the main `outsystems` skill describes: raise the turn-time ceiling where the catalog offers one; otherwise send a follow-up turn that asks Mentor to finish only what is still missing from this part, reusing what it already built. This retry is the part's one fix turn (Step 5, item 3). If the session ended after part 1 was published, open a new session and reference the same `app_key` in its asset references, then send part 2 there.
 
 ### Publishing (after each part)
 
