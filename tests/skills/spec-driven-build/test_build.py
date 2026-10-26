@@ -970,16 +970,30 @@ OTHER_BAD = {"assetKey": "b0000002", "attemptedChange": True, "changeApplied": F
     (_facts(OWN_OK, OTHER_BAD), True, "succeeded, no validation errors"),
     (_facts(dict(OWN_OK, changeApplied=False)), False, "the change was not applied"),
     (_facts(dict(OWN_OK, validation={"errorCount": 2})), False, "2 validation error(s)"),
-    (_facts(dict(OWN_OK, assetKey="c0000003"), OTHER_BAD), False,
-     "the change was not applied on asset b0000002"),
-    (_facts(dict(OWN_OK, assetKey="c0000003")), True, "succeeded, no validation errors"),
-    (dict(LANDED, result={"assetFacts": []}), True, "succeeded, no validation errors"),
-    (dict(LANDED, result={"assetFacts": [], "asset_facts": [OTHER_BAD]}), True,
-     "succeeded, no validation errors"),
-    (dict(LANDED, result={"asset_facts": [OTHER_BAD]}), False,
-     "the change was not applied on asset b0000002"),
+    (_facts(dict(OWN_OK, assetKey="c0000003"), OTHER_BAD), False, "no completion signals for a0000001"),
+    (_facts(dict(OWN_OK, assetKey="c0000003")), False, "no completion signals for a0000001"),
+    (dict(LANDED, result={"assetFacts": []}), False, "no completion signals for a0000001"),
+    (dict(LANDED, result={"assetFacts": [], "asset_facts": [OWN_OK]}), False,
+     "no completion signals for a0000001"),
+    (dict(LANDED, result={"asset_facts": [OWN_OK]}), True, "succeeded, no validation errors"),
+    (dict(LANDED, result={"asset_facts": [dict(OWN_OK, changeApplied=False)]}), False,
+     "the change was not applied"),
 ])
 def test_per_asset_facts_are_read_for_the_app_key(tmp_path, result, landed, reason):
     p, text = report(tmp_path, result)
     assert p.returncode == (0 if landed else 1)
+    assert f"**Landed:** {'yes' if landed else 'no'} ({reason})" in text
+
+
+@pytest.mark.parametrize("result,landed,reason", [
+    (_facts(OWN_OK), True, "succeeded, no validation errors"),
+    (_facts(OWN_OK, OTHER_BAD), False, "the change was not applied on asset b0000002"),
+    (dict(LANDED, result={"assetFacts": []}), False, "no completion signals for any app"),
+])
+def test_without_an_app_key_every_asset_entry_decides(tmp_path, result, landed, reason):
+    f = tmp_path / "result.json"
+    f.write_text(json.dumps(result), encoding="utf-8")
+    p = run("render-report", "--spec", EXAMPLE, "--output", tmp_path / "report.md", "--result", f)
+    assert p.returncode == (0 if landed else 1)
+    text = (tmp_path / "report.md").read_text(encoding="utf-8")
     assert f"**Landed:** {'yes' if landed else 'no'} ({reason})" in text

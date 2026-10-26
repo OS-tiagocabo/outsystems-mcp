@@ -702,7 +702,7 @@ def _read_run(raw) -> dict:
     pages = _pages(raw)
     if not pages:
         return {"run_id": "", "status": "unknown", "result": {}, "validation": {},
-                "asset_facts": [], "summary": "", "error": ""}
+                "asset_facts": None, "summary": "", "error": ""}
     last = next((p for p in reversed(pages) if p.get("status")), pages[-1])
     events: list = []
     for p in pages:
@@ -715,13 +715,15 @@ def _read_run(raw) -> dict:
         error = error.get("message") or json.dumps(error)
     validation = result.get("validation") or last.get("validation") or {}
     asset_facts = (result["assetFacts"] if "assetFacts" in result
-                   else result.get("asset_facts", []))
+                   else result.get("asset_facts"))
+    if asset_facts is not None:
+        asset_facts = [f for f in asset_facts if isinstance(f, dict)] if isinstance(asset_facts, list) else []
     return {
         "run_id": str(last.get("runId") or ""),
         "status": str(last.get("status") or "unknown"),
         "result": result,
         "validation": validation if isinstance(validation, dict) else {},
-        "asset_facts": [f for f in asset_facts if isinstance(f, dict)] if isinstance(asset_facts, list) else [],
+        "asset_facts": asset_facts,
         "summary": str(summary or ""),
         "error": str(error),
     }
@@ -758,21 +760,25 @@ def _facts_landed(validation: dict, facts: dict, suffix: str = "") -> tuple[bool
 def _landed(run: dict, app_key: str | None = None) -> tuple[bool, str]:
     """Whether the turn's work landed, from the terminal completion signals,
     as the main skill reads them: `succeeded` only means the turn ended.
-    Signals come per asset in `assetFacts`: the app's own entry decides, and
-    without one every entry must have landed. A result without `assetFacts`
-    carries one flat set of signals (older servers)."""
+    Signals come per asset in `assetFacts`: with an app key only the app's own
+    entry decides, and without one every entry must have landed; no entry to
+    decide from is no evidence, so it doesn't land. Only a result without
+    `assetFacts` carries one flat set of signals (older servers)."""
     if run["status"] != "succeeded":
         return False, f"status is {run['status']}"
     if run["error"]:
         return False, f"turn error: {run['error']}"
     facts = run["asset_facts"]
-    if not facts:
+    if facts is None:
         return _facts_landed(run["validation"], run["result"])
-    key = (app_key or "").strip().lower()
-    own = [f for f in facts if key and str(f.get("assetKey", f.get("asset_key", ""))).lower() == key]
-    for f in own or facts:
+    key = (app_key or "").strip()
+    if key:
+        facts = [f for f in facts if str(f.get("assetKey", f.get("asset_key", ""))).lower() == key.lower()]
+    if not facts:
+        return False, f"no completion signals for {key or 'any app'}"
+    for f in facts:
         validation = f.get("validation") if isinstance(f.get("validation"), dict) else {}
-        suffix = "" if own else f" on asset {f.get('assetKey', f.get('asset_key', '?'))}"
+        suffix = "" if key else f" on asset {f.get('assetKey', f.get('asset_key', '?'))}"
         landed, reason = _facts_landed(validation, f, suffix)
         if not landed:
             return landed, reason
