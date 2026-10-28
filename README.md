@@ -312,6 +312,10 @@ They are validated on Claude Code, which also keeps the largest tool results out
 
 `outsystems-custom-code` is validated on Claude Code; Cursor and Kiro receive the same folder, but running it there has not been validated yet. It runs no script of its own: the agent builds and tests the library in your workspace with the .NET 10 SDK, and Docker for the container integration tests, so it needs a shell. It uploads the library package to your tenant and publishes it through the OutSystems MCP, and asks before each of the two.
 
+## Legacy modernization plugin
+
+The `legacy-modernization` plugin, in the `legacy-modernization/` folder, adds skills, commands and subagent roles for moving legacy applications (Lotus Notes, AS/400, COBOL, Java and others) onto OutSystems: extract the requirements from the legacy sources, then design, build and verify the replacement app through Mentor. It ships in the same marketplace as the `outsystems` plugin and uses that plugin's MCP server, so install `outsystems` first. On Claude Code: `claude plugin install legacy-modernization@outsystems`. Extraction needs your tenant enabled for it. See [legacy-modernization/README.md](legacy-modernization/README.md) for the commands, the dependencies and the other hosts.
+
 ## Troubleshooting
 
 | Symptom | Cause and fix |

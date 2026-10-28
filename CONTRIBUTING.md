@@ -78,6 +78,7 @@ kiro/
       outsystems-*/       # Byte-identical copies of the six Beta skills under claude/skills/
 tests/
   skills/                 # Offline pytest suites for the Beta skills' scripts, with anonymised fixtures
+legacy-modernization/     # Second plugin in both marketplaces: legacy-modernization skills, commands, agents and role playbooks (own version, own README)
 SKILL.md                  # Generic skill content for other harnesses
 README.md                 # Install instructions for each supported harness
 ```
