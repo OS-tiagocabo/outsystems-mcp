@@ -164,7 +164,7 @@ When building a design into a working app:
   project ships 26 ready-made screen patterns (dashboards, list-and-detail,
   catalogs, forms, galleries, …) composed from OSUI blocks, and
   `mentor_create_asset` can create an asset straight from a template. The block
-  and pattern vocabulary is in Skill `outsystems-osui-idioms`'s
+  and pattern vocabulary is in the `outsystems-design-to-app` skill's
   `references/screen-guides/` and `references/outsystems-ui/patterns/`. Read it
   so that when a design
   region *is* a card / column grid / table / tabs / counter / pagination / filter
@@ -179,7 +179,7 @@ When building a design into a working app:
   A paginated table with no visible arrows is a defect, not done.
   The same rule covers **form controls**: name the platform widget — native
   `Input` / `Text Area` / `Dropdown` / `Checkbox`, OSUI `DropdownSearch` /
-  `Switch` / `DatePicker`, `SearchInput` for search — never a hand-rolled
+  `Switch` / `DatePicker`, the OSUI `Search` pattern for search — never a hand-rolled
   container-with-CSS control (**invoke Skill `outsystems-osui-idioms`** — the
   widget rows live in its gate table). **Overlays too:** a modal, dialog or
   confirmation is the native `Popup` (opened by a Boolean local bound to
@@ -203,7 +203,7 @@ When building a design into a working app:
 - **Verify a match against the OutSystems UI reference when unsure.** The shipped
   `outsystems-*` skills and the template inventory above are the source of truth for
   *which block to name*; the vendored OSUI reference is in-image at
-  Skill `outsystems-osui-idioms`'s
+  the `outsystems-design-to-app` skill's
   **`references/outsystems-ui/`** — `patterns/` plus `styles-and-utilities.md`
   for the OutSystems UI (Reactive) `--color-*` / `--space-*` CSS variables (do
   **not** reach for `design-tokens.md` for Reactive styling — that file is the
@@ -244,7 +244,7 @@ When building a design into a working app:
   to page. One Block beats N
   copies (consistent, single place to restyle, less to maintain). Extract only when the
   structure genuinely repeats or clearly will (YAGNI); the Block must still match the
-  design. Playbook: Skill `outsystems-osui-idioms`'s
+  design. Playbook: the `outsystems-design-to-app` skill's
   **`references/screen-guides/reusable-blocks.md`** (shared
   nav/header/footer → **invoke Skill `outsystems-block-editing`**).
 - **Say what you chose and why.** When you build a region with a stock pattern
@@ -407,8 +407,9 @@ Figma tools, but everything else is the same):
 
 3. **Confirm scope with the user ONLY if the design is ambiguous about a
    non-visual requirement** (e.g. "should saved items persist across users?").
-   Otherwise proceed — the detailed plan canvas is itself the confirmation
-   surface, and the user can redirect from there.
+   Otherwise proceed with the plan. The plan is not a confirmation of tenant
+   writes: each app creation and each publish is still confirmed with the user,
+   as the main `outsystems` skill requires.
 
 4. **Keep the detailed plan alive — update it on every step transition.**
    The plan is not a one-shot announcement; it's the source of truth the user
@@ -750,9 +751,10 @@ run the mentor → publish → preview flow against the returned `assetKey`.
   rather than reflexively picking a new name.
 - The generated app records `clonedFromTemplateKey` lineage (like ODC Studio's
   wizard) and carries the standard template's auth screen set — extend it, don't
-  reinvent it. Fall back to "ask the user to create a base/template app in ODC
-  Studio" ONLY if the tenant exposes neither `app_create` nor
-  `mentor_create_asset`, or no platform template can be found for a web app or agent.
+  reinvent it. When the tenant exposes neither `app_create` nor `mentor_create_asset`, ask
+  Mentor to create the app in a prompt, naming the kind and its standard template,
+  as the main `outsystems` skill says. Ask the user to create it in ODC Studio only
+  when Mentor can't.
 
 **Guardrails to bake into every mentor prompt (field-tested — these are Mentor's
 common fumbles).** Fold these into the prompt text you hand `mentor_start`:
@@ -813,8 +815,8 @@ below that is not a tool name — the chunk cadence, the ~5-change ceiling, the
 verification discipline — applies identically to both.
 
 **Tenant edit + publish flow — run-based surface** (each long-running tool
-returns an id you poll; **stay in this same turn and keep polling until the whole
-flow is done** — see the polling + completion note below). On the session-based
+returns an id you poll; **keep polling at the main `outsystems` skill's pace until the
+whole flow is done** — see the polling + completion note below). On the session-based
 surface, substitute per the table above:
 1. `mcp__outsystems__app_list {search}` / `context_*` to locate the app + read it.
 2. `mcp__outsystems__mentor_start {app_key, prompt}` → poll `mentor_get_run {runId, cursor}`
@@ -877,8 +879,9 @@ then extend.** The rule and its reason are Skill `outsystems-app-build`'s **rule
 preference rather than a tactic for large requests only: **prefer small
 iterative changes on every task**, so testing feedback arrives quickly.
 Start with the **thinnest end-to-end slice that actually runs** — a minimal data
-model + ONE screen (a table over the main entity) you can publish and test right
-away — and get that published before you build anything else. Once that slice
+model, published on its own first (the main `outsystems` skill publishes the data
+model before any screen turn), then ONE screen (a table over the main entity) you
+can publish and test right away — and get that published before you build anything else. Once that slice
 works, **extend in small increments**: add more entities / attributes, or enrich
 that same screen (filters, a detail view, create/edit), re-testing after each.
 When a screen is genuinely done (built, published, and driven green in the
@@ -890,7 +893,8 @@ chunks, and every one of them publishes** under the cadence below. The opening
 slice is usually a single chunk because none of its parts can be proven without
 the others; a richer screen layers into several (see "Build a complex SCREEN in
 feature chunks too"). What a slice is never allowed to be is one batched publish
-at its end.
+at its end. Each of those publishes is confirmed with the user first, as the main
+`outsystems` skill requires.
 Resist the urge to batch many screens/entities into one giant `mentor_start`
 turn; small slices test better and dodge the max-length cap.
 
@@ -1052,25 +1056,25 @@ for a trivial immediate follow-up to what it just built.
 - If the server rejects `fresh_context` as unknown: publish, then use a new
   `app_key` session per chunk (older-server fallback).
 
-**Poll mentor frequently, stay in the turn, and keep the detailed plan live.**
+**Poll mentor at the main skill's pace, and keep the detailed plan live.**
 `mentor_start` launches a long-running server-side sub-agent that emits its
 progress as cursor-paged event batches. Poll
 `mcp__outsystems__mentor_get_run {runId, cursor}` **immediately** after
 `mentor_start`, and **again as soon as the cursor advances** — don't sit idle
 while events are still arriving. When the cursor is drained but the run is NOT
-terminal, wait **15–30 s** and poll again, until the run is terminal — **all
-within this same turn**. **On the session surface (`mentor_prompt`), heartbeat-only events do not count as
+terminal, wait and poll again at the pace the main `outsystems` skill sets (at least ~30 s
+between Mentor polls, as a background wait, or through the `outsystems:status-watcher`
+agent on Claude Code), until the run is terminal. **On the session surface (`mentor_prompt`), heartbeat-only events do not count as
 the cursor advancing**: `mentor_get_run` streams `reasoning` heartbeats (`text: null`) every few
 seconds whether the turn is working or stuck, so there the cursor never drains — wait
-15–30 s between polls regardless of the cursor. The run status is the clock: never wait a fixed long
+at least ~30 s between polls regardless of the cursor. The run status is the clock: never wait a fixed long
 time (80–230 s background sleeps leave the agent idle after most runs have
-already finished). The Bash tool blocks a foreground `sleep N`, so wait with an
-until-loop:
-`end=$((SECONDS+20)); until [ $SECONDS -ge $end ]; do sleep 2; done`.
+already finished). Wait the way the main `outsystems` skill says (a background wait, then end
+the turn), not with a foreground loop.
 **While the cursor is drained, respect the `pollAfterMs` / `pollIntervalMs` the
-response returns as a floor, never below 15 s**, and fire **one wait, then one poll**. Each poll is a model
+response returns as a floor, never below ~30 s**, and fire **one wait, then one poll**. Each poll is a model
 call that re-reads the conversation, so a 1 s loop burns calls without finishing
-the run faster. Wait the same way between publish-status checks. **Call `mcp__plan__update_plan` to advance the detailed plan from each terminal
+the run faster. Between publish-status checks, wait 5–15 s. **Call `mcp__plan__update_plan` to advance the detailed plan from each terminal
 result**: flip a turn's items to `in_progress` when you send its prompt. A
 `succeeded` run doesn't make them `done`: one with `attemptedChange: false` only
 wrote a plan. Mark them `done` once the behaviour is verifiable in the OML or the
@@ -1156,8 +1160,10 @@ You are the only role that runs `mentor_start`, so you are the only one who sees
 how the tenant tooling actually behaves. The OutSystems MCP tools you build with
 are owned by another team at OutSystems, and they only learn something is wrong
 if a caller tells them — so file what you see with
-`mcp__outsystems__submit_feedback` as you build, **on your own initiative,
-without asking permission and without waiting for the user to complain.**
+`mcp__outsystems__submit_feedback` as you build, **on your own initiative and
+without waiting for the user to complain, once the user has agreed to it in this
+conversation** (the main `outsystems` skill's consent gate: ask once, before the
+first one).
 
 Every call takes the same three fields, plus the project tag that makes it
 attributable to us:

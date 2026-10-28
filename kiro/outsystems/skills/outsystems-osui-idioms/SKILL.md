@@ -11,6 +11,8 @@ metadata:
 
 **Beta Feature.** This skill is a Beta Feature: a non-final OutSystems capability provided to collect customer feedback. It can change significantly, including through breaking changes, or be discontinued. The first time you use this skill in a conversation, tell the user it's a Beta Feature and share <https://www.outsystems.com/legal/beta-features-agreement>.
 
+**The main `outsystems` skill's rules come first.** Where this skill differs from it on sign-in, sessions, polling, app creation, publishing or confirmation, follow the main skill, and confirm each app creation and each publish with the user before it runs.
+
 # OutSystems OSUI Idioms
 
 The **block-mapping gate** — every visual element maps to a real OSUI block or
@@ -23,15 +25,15 @@ limits, publish triad, auth screens — is in
 **[OutSystems-OSUI-Idioms.md](./OutSystems-OSUI-Idioms.md)**.
 **Read it before the first screen** and run the per-screen audit before sign-off.
 
-Also read the canonical references bundled with this skill (`references/outsystems-ui/`,
-`references/screen-guides/`). When a Figma design is in scope, invoke **outsystems-ui-exactness**.
+Also read the canonical references in the `outsystems-design-to-app` skill's folder
+(`../outsystems-design-to-app/references/outsystems-ui/`, `../outsystems-design-to-app/references/screen-guides/`). When a Figma design is in scope, invoke **outsystems-ui-exactness**.
 
 ## The six rules that matter most
 
 1. **Theme at the source** — `ThemeValues` + OSUI CSS variables (`--color-primary`,
    `--header-size`, …) on day zero. The default OML green primary leaks everywhere
    until you override it.
-2. **Real OSUI blocks** — `LayoutTopMenu`, `Tag`/`Badge`, `Counter`, `SearchInput`,
+2. **Real OSUI blocks** — `LayoutTopMenu`, `Tag`/`Badge`, `Counter`, `Search`,
    OSUI `Breadcrumb`, `Button` vs `Link` for actions vs navigation.
 3. **Widgets before custom code, overlays included** — a modal or confirm is the
    native `Popup`, a side panel OSUI `Sidebar`, never a container with a CSS

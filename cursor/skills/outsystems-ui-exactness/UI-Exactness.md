@@ -268,7 +268,7 @@ a divergent checklist into prompts or workflow nodes.
 
 ## Design pack (required before Mentor UI build)
 
-Under `app/workspace/<run-slug>/design-pack/`:
+Under a `design-pack/` folder in the user's working folder:
 
 | File | Contents |
 |------|----------|

@@ -11,6 +11,8 @@ metadata:
 
 **Beta Feature.** This skill is a Beta Feature: a non-final OutSystems capability provided to collect customer feedback. It can change significantly, including through breaking changes, or be discontinued. The first time you use this skill in a conversation, tell the user it's a Beta Feature and share <https://www.outsystems.com/legal/beta-features-agreement>.
 
+**The main `outsystems` skill's rules come first.** Where this skill differs from it on sign-in, sessions, polling, app creation, publishing or confirmation, follow the main skill, and confirm each app creation and each publish with the user before it runs.
+
 # OutSystems Auth, Deploy Diagnostics & Runtime Truth
 
 The failures in this skill share one shape: **everything you can see says green,
@@ -343,7 +345,7 @@ pre-harness revision overwrites them.
 
 ---
 
-## 10. Mentor backend stalls — a fresh `app_key` session beats a wedged resume
+## 10. Mentor backend stalls — cancel, shrink the turn, stay in the session
 
 The degraded-backend failure shape is specific: a run sits at
 `currentStep: "applyModelApiCode"` for **~10 min** with no transition (a generic
@@ -355,8 +357,9 @@ on a fresh `app_key` session too, so read turn **SIZE**, not session freshness, 
 the primary lever (see the turn-shrink bullet below).
 
 - Resume stalled past ~10 min at `applyModelApiCode` → fire `mentor_cancel` (don't
-  wait on it) and start a **fresh `app_key` session** with the same prompt. A new
-  session reads the latest committed revision and bypasses the wedged one.
+  wait on it) and retry in the same session with a smaller turn, as the main
+  `outsystems` skill says. Open a fresh `app_key` session only when the error says the
+  session is gone.
 - A transient `"agent serve error"` / `upstream_status: 500` is a **different**
   failure — a backend hiccup with no OML committed. Just resume with the refreshed
   token from the failed run's `error` and retry.

@@ -1,6 +1,6 @@
 ---
 name: outsystems-figma-design-source
-description: "[Beta] Figma as the design source of truth: parse a shared URL into fileKey + nodeId, pull literal tokens/geometry with get_design_context / get_metadata / get_variable_defs, capture per-screen screenshots, and author or extend designs with use_figma (one page per option, transactional-edit rules). Use when a Figma URL is supplied or Figma is the session's design medium. Not for: the parity law itself (claims, gates, verify loop) -> outsystems-ui-exactness; widget choice with no design -> outsystems-osui-idioms. Not for OutSystems 11 (O11) or Service Studio."
+description: "[Beta] Figma as the design source of truth: parse a shared URL into fileKey + nodeId, pull literal tokens/geometry with get_design_context / get_metadata / get_variable_defs, capture per-screen screenshots, and author or extend designs with use_figma (one page per option, transactional-edit rules). Use when a Figma URL is supplied or Figma is the session's design medium. Not for: the parity law itself (claims, gates, verify loop) -> outsystems-ui-exactness; widget choice with no design -> outsystems-osui-idioms. Not for: building an app from a Figma design end to end -> outsystems-design-to-app. Not for OutSystems 11 (O11) or Service Studio."
 license: MIT
 compatibility: Ships for Claude Code, Cursor and Kiro. Requires the `outsystems` MCP server connected and authenticated, and builds on the main `outsystems` skill for session, polling and publish rules. Mentor must be enabled on the tenant. For Figma sources, the Figma MCP server must also be connected. No scripts; pure guidance.
 metadata:
@@ -10,6 +10,8 @@ metadata:
 ---
 
 **Beta Feature.** This skill is a Beta Feature: a non-final OutSystems capability provided to collect customer feedback. It can change significantly, including through breaking changes, or be discontinued. The first time you use this skill in a conversation, tell the user it's a Beta Feature and share <https://www.outsystems.com/legal/beta-features-agreement>.
+
+**The main `outsystems` skill's rules come first.** Where this skill differs from it on sign-in, sessions, polling, app creation, publishing or confirmation, follow the main skill, and confirm each app creation and each publish with the user before it runs.
 
 # Figma as the design source
 

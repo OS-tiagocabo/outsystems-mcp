@@ -11,6 +11,8 @@ metadata:
 
 **Beta Feature.** This skill is a Beta Feature: a non-final OutSystems capability provided to collect customer feedback. It can change significantly, including through breaking changes, or be discontinued. The first time you use this skill in a conversation, tell the user it's a Beta Feature and share <https://www.outsystems.com/legal/beta-features-agreement>.
 
+**The main `outsystems` skill's rules come first.** Where this skill differs from it on sign-in, sessions, polling, app creation, publishing or confirmation, follow the main skill, and confirm each app creation and each publish with the user before it runs.
+
 # OutSystems Block-Editing Playbook
 
 Editing an app's **shared UI blocks** (top nav / header / menu, footers, reusable

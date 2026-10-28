@@ -1,6 +1,6 @@
 ---
 name: outsystems-app-build
-description: "[Beta] The end-to-end build playbook: data model, seed data, screens, publish, and verify-by-driving — sliced so the first publish is already a screen the user can open — plus how to spend mentor sessions and publish cycles well. Use when scaffolding a new app or a substantial new feature area, porting a source app onto a tenant, or bootstrapping/seeding an entity. Not for: a single feature or edit on an app that already exists -> outsystems-ui-recipes (screens) or outsystems-block-editing (shared chrome). Not for OutSystems 11 (O11) or Service Studio."
+description: "[Beta] The end-to-end build playbook: data model, seed data, screens, publish, and verify-by-driving — sliced so the first publish is already a screen the user can open — plus how to spend mentor sessions and publish cycles well. Use when scaffolding a new app or a substantial new feature area, porting a source app onto a tenant, or bootstrapping/seeding an entity. Not for: a single feature or edit on an app that already exists -> outsystems-ui-recipes (screens) or outsystems-block-editing (shared chrome). Not for: bootstrapping a whole new app from a design source -> outsystems-design-to-app, or from a written spec -> outsystems-spec-driven-build. Not for OutSystems 11 (O11) or Service Studio."
 license: MIT
 compatibility: Ships for Claude Code, Cursor and Kiro. Requires the `outsystems` MCP server connected and authenticated, and builds on the main `outsystems` skill for session, polling and publish rules. Mentor must be enabled on the tenant. No scripts; pure guidance.
 metadata:
@@ -10,6 +10,8 @@ metadata:
 ---
 
 **Beta Feature.** This skill is a Beta Feature: a non-final OutSystems capability provided to collect customer feedback. It can change significantly, including through breaking changes, or be discontinued. The first time you use this skill in a conversation, tell the user it's a Beta Feature and share <https://www.outsystems.com/legal/beta-features-agreement>.
+
+**The main `outsystems` skill's rules come first.** Where this skill differs from it on sign-in, sessions, polling, app creation, publishing or confirmation, follow the main skill, and confirm each app creation and each publish with the user before it runs.
 
 # OutSystems ODC Build Playbook
 
@@ -29,7 +31,8 @@ has the branch. **Confirm the tenant at the same time:** the server is registere
 per tenant (`https://<tenant>/mcp`), so name the tenant you are about to change
 and, unless it is obviously the one the user meant, get their confirmation
 before the first `mentor_start` or `mentor_create_asset` — a build on the wrong
-tenant is a real app on the wrong tenant.
+tenant is a real app on the wrong tenant. Separately, confirm each app creation and
+each publish before it runs, as the main `outsystems` skill requires.
 
 When Figma is in scope: invoke Skill **`outsystems-ui-exactness`** (Exactness Contract
 also summarized in the legacy-modernization plugin's developer role). Build via **OSUI → Theme CSS
@@ -103,8 +106,8 @@ canvas the user reads. Full recipe, widget tree, the dropdown binding and valida
 
 1. **Minimize mentor sessions; batch related sub-parts into one turn — up to a
    ceiling.** Every `mentor_start` re-loads the OML server-side. Resume the same
-   session for follow-ups; start fresh only when the OML may have diverged or the
-   last run wedged. One turn can build several aggregates + widgets + wiring at
+   session for follow-ups; open a new session only when the error says the session is
+   gone, as the main `outsystems` skill says. One turn can build several aggregates + widgets + wiring at
    once — but split genuinely unrelated features so each publishes/tests
    independently, cap a turn at **~5 plan-item-sized changes**, and give a
    **library/reference add its own turn** (on the `mentor_prompt` session surface,
@@ -173,9 +176,10 @@ canvas the user reads. Full recipe, widget tree, the dropdown binding and valida
 
 6. **First screen first — build down, not across.** Order the work so the
    **first publish lands a screen the user can open and navigate**: the app, the
-   one entity that screen reads, its seed rows, that screen, publish. Then
-   extend. Those parts are **one chunk**, not four, and they are the one case
-   where several artifacts share a chunk: none of them can be proven on its own —
+   one entity that screen reads and its seed rows, publish (the main `outsystems`
+   skill publishes the data model before any screen turn), then that screen,
+   publish. Then extend. Those parts are **one slice**, not four, and they are the
+   one case where several artifacts share an assertion: none of them can be proven on its own —
    an entity with no screen has nothing to drive, a screen with no rows proves
    nothing — so they share the single assertion that makes a chunk a chunk
    ("the screen opens and lists the seeded rows"). Everything after this opening

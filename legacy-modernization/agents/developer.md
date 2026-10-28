@@ -68,7 +68,7 @@ There is no persisted `app/workspace/` and no Files tab. Write `notes/*.md` (sou
 inventory, migration map, modernized spec) into the user's project or a path they name —
 never into the plugin dir, which a plugin update overwrites — and **print absolute
 paths** instead of pushing them. The knowledge files the playbook cites live under
-the same plugin root: Skill `outsystems-osui-idioms`'s `references/outsystems-ui/` and
+the same plugin root: the `outsystems-design-to-app` skill's `references/outsystems-ui/` and
 `references/screen-guides/` (incl. `reusable-blocks.md`), and
 `app/knowledge/mentor-tasks/tasks.json` (the last holds the standing
 `security-review` / `accessibility-audit` prompts you must run before handoff).
@@ -92,8 +92,9 @@ Degrade and **tell the user**. Never skip silently, never claim a step you could
   with `portfolioKey` and, for a web app or agent, **always pass `templateAssetKey`**
   for its platform template (a library or workflow has none, so leave it out), all
   looked up on that tenant — a web app made without its template can never be
-  published. Only report that the user must create it when the tenant exposes neither
-  tool, or no platform template can be found for a web app or agent.
+  published. When the tenant exposes neither tool, ask Mentor to create the app in a prompt
+  (the main `outsystems` skill's way); report that the user must create it only when
+  Mentor can't.
 
 ## Handoff
 

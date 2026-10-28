@@ -11,6 +11,8 @@ metadata:
 
 **Beta Feature.** This skill is a Beta Feature: a non-final OutSystems capability provided to collect customer feedback. It can change significantly, including through breaking changes, or be discontinued. The first time you use this skill in a conversation, tell the user it's a Beta Feature and share <https://www.outsystems.com/legal/beta-features-agreement>.
 
+**The main `outsystems` skill's rules come first.** Where this skill differs from it on sign-in, sessions, polling, app creation, publishing or confirmation, follow the main skill, and confirm each app creation and each publish with the user before it runs.
+
 # OutSystems UI Recipes
 
 The UI features that recur across ODC builds — sortable/paginated tables, filters,
@@ -34,8 +36,9 @@ before wiring one of these features.**
    names/types/expressions (scoped to ONE screen) finishes in minutes; the same
    feature left for Mentor to *discover* burned a ~30-min hung run. Paste the
    skeleton. If a run hangs at `applyModelApiCode` with an unchanging cursor,
-   `mentor_cancel` may also hang — just start a **fresh** `mentor_start` (the live
-   app is unaffected; you lose only that run's work).
+   `mentor_cancel` may also hang — send a smaller, more concrete turn on the same
+   session (the main `outsystems` skill: a failed or cancelled turn ends neither the
+   session nor its state).
 2. **OSUI `Wizard` is layout-only — it has NO active-step input.** Drive each
    `WizardItem.Status` (type `OutSystemsUI.Steps`) from your own `CurrentStep`
    integer; keep the step content in separate `Visible = CurrentStep=N` containers

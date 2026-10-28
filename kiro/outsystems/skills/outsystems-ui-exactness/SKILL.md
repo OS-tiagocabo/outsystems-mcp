@@ -1,6 +1,6 @@
 ---
 name: outsystems-ui-exactness
-description: "[Beta] The single law for design-to-screen parity, whatever the design tool: literal hex/px/radius claims in every Mentor prompt, DOM-before-CSS on OSUI chrome, a design pack before any UI, and one Mentor turn -> one publish -> claim verify. Use whenever a design artifact (a design-tool frame, a code mockup, or a supplied export) is in scope for a Theme / chrome / screen turn, or a visual-identity gate runs. Not for: extracting values out of Figma specifically -> outsystems-figma-design-source; picking widgets when there is no design to measure against -> outsystems-osui-idioms. Not for OutSystems 11 (O11) or Service Studio."
+description: "[Beta] The single law for design-to-screen parity, whatever the design tool: literal hex/px/radius claims in every Mentor prompt, DOM-before-CSS on OSUI chrome, a design pack before any UI, and one Mentor turn -> one publish -> claim verify. Use whenever a design artifact (a design-tool frame, a code mockup, or a supplied export) is in scope for a Theme / chrome / screen turn, or a visual-identity gate runs. Not for: extracting values out of Figma specifically -> outsystems-figma-design-source; picking widgets when there is no design to measure against -> outsystems-osui-idioms. Not for: bootstrapping a new app from a design -> outsystems-design-to-app. Not for OutSystems 11 (O11) or Service Studio."
 license: MIT
 compatibility: Ships for Claude Code, Cursor and Kiro. Requires the `outsystems` MCP server connected and authenticated, and builds on the main `outsystems` skill for session, polling and publish rules. Mentor must be enabled on the tenant. No scripts; pure guidance.
 metadata:
@@ -10,6 +10,8 @@ metadata:
 ---
 
 **Beta Feature.** This skill is a Beta Feature: a non-final OutSystems capability provided to collect customer feedback. It can change significantly, including through breaking changes, or be discontinued. The first time you use this skill in a conversation, tell the user it's a Beta Feature and share <https://www.outsystems.com/legal/beta-features-agreement>.
+
+**The main `outsystems` skill's rules come first.** Where this skill differs from it on sign-in, sessions, polling, app creation, publishing or confirmation, follow the main skill, and confirm each app creation and each publish with the user before it runs.
 
 # UI Exactness
 

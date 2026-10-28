@@ -58,7 +58,7 @@ checklist, say exactly what to attach, and stop.
 | `mcp__preview__show_app` | no built-in canvas — **print the published URL**, and when this host has a canvas-equivalent surface (an IDE simple browser / preview panel, a browser MCP page, an artifact-publishing tool), **open the running app there too** so the user sees it without leaving the harness |
 | `mcp__preview__show_file` | no built-in canvas — **print the absolute path** so the user can open it, and render the artifact on the host's canvas-equivalent when one exists (e.g. publish the report as an artifact page, or open it in the IDE preview) |
 | `mcp__preview__render_pdf` | Playwright print-to-PDF, or local `mmdc`/`pandoc` via `Bash`; if neither exists, deliver the markdown and **say so** |
-| `mcp__outsystems__*` | the user's own **OutSystems MCP** — discover at runtime, call **bare** names (`mentor_start`, `mentor_get_run`, `publish_start`, `app_list`, `context_*`) |
+| `mcp__outsystems__*` | the user's own **OutSystems MCP** — discover at runtime, call **bare** names (for example `mentor_get_run`, `app_list`, `context_*`; publishing is whatever the catalog advertises) |
 | `mcp__figma__*` | the user's own **Figma MCP**, bare names (`get_design_context`, `get_metadata`, `get_variable_defs`, `use_figma`) |
 | `mcp__extractor__*` | not part of this run. If specs are missing, run `/extract-requirements` first: it extracts through the **`modernize_*`** tools on the user's OutSystems MCP |
 | `mcp__knowledge__*` | **in-app only** — the tool does not exist here. The `/create-or-update-skill-knowledge` **command DOES ship in this plugin**: offer it at the end of the run for the candidate lessons; it produces a reviewable bundle and the user opens the PR with `gh`/git |

@@ -2,7 +2,7 @@
 
 Shared by every Agent Skills host (Skill `outsystems-ui-exactness`).
 
-- **Disk workspace:** copy into `app/workspace/<run-slug>/design-pack/`.
+- **Disk workspace:** copy into a `design-pack/` folder in the user's working folder.
 - **Chat harness:** same claim tables live in the DesignBrief / plan (or a workspace
   `design-pack/` if the run uses one). Do not invent a softer claim shape.
 

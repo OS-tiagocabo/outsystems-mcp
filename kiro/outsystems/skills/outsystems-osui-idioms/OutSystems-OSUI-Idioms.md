@@ -7,7 +7,7 @@
 ## Day 0 — before any screen
 
 1. Invoke **outsystems-ui-exactness** (when a Figma design is in scope) or read
-   `references/screen-guides/design-system.md`.
+   `../outsystems-design-to-app/references/screen-guides/design-system.md`.
 2. Set brand via **ThemeValues** (`PrimaryColor` / `SecondaryColor`) and `:root` OSUI variables:
    - `--color-primary` (+ `-hover` / `-selected`), `--color-secondary`,
      `--color-background-body`, `--header-color`, `--header-size`,
@@ -65,8 +65,8 @@ use `Container` + `Expression` + custom CSS where a block exists.
 `Sidebar`, or `Stepper`, map it to THAT block — do NOT substitute `Columns3`
 because the screenshot happens to show the items side by side. The source name is
 the author's intent; look the block's args/placeholders up in
-`references/outsystems-ui/ui-reference.md` + the matching
-`references/outsystems-ui/patterns/*.md` before building it.
+`../outsystems-design-to-app/references/outsystems-ui/ui-reference.md` + the matching
+`../outsystems-design-to-app/references/outsystems-ui/patterns/*.md` before building it.
 
 **The one legit `display-flex`:** `display-flex` on a widget's `Style` is allowed
 ONLY for inline alignment INSIDE a single block placeholder — icon + text in a
@@ -113,7 +113,7 @@ sibling pattern is theme inheritance. Revert and re-read the reference apps.
 - [ ] Header is `LayoutTopMenu` if design has app chrome
 - [ ] Chips are `Tag` / `Badge`
 - [ ] KPIs are `Counter`
-- [ ] Search is `SearchInput`
+- [ ] Search is the OSUI `Search` pattern (or `InputWithIcon` with a search icon)
 - [ ] Form fields are native `Input` / `Text Area` / `Dropdown` / `Checkbox` (or OSUI `DropdownSearch` / `Switch` / `DatePicker`) — no hand-rolled controls
 - [ ] Breadcrumbs use OSUI `Breadcrumb`
 - [ ] Actions are `Button`; navigation is `Link`
@@ -132,7 +132,7 @@ After every publish — **never trust Mentor signals alone**:
 3. **Deploy proof** — `env_app` / `app_info` revision and **`modelDigest`** changed;
    `no_changes_detected: true` fires falsely on many tenants.
 
-If `change_applied: true` but triad fails → treat as not persisted; re-attempt in a fresh mentor session if contaminated.
+If `change_applied: true` but triad fails → treat as not persisted; re-attempt in the same session with a narrower turn; open a new session only when the error says it is gone.
 
 ---
 
@@ -154,7 +154,8 @@ If `change_applied: true` but triad fails → treat as not persisted; re-attempt
 - **Every stat/counter/badge/KPI is bound to a query, not a literal.** After a
   mockup-based build, sweep them all and confirm each *moves* when the data moves.
   An oddly specific value ("209,431 total") over a 219-row table is a design
-  sample number that was never wired. Rebind per **outsystems-ui-recipes** §16.
+  sample number that was never wired. Rebind per **outsystems-ui-recipes** §16. The one exception: a build from a design whose KPI values
+  were deliberately stored or seeded to match it (`outsystems-design-to-app`'s KPI-source decision).
 
 - Same filter definition drives **KPI count and list count**.
 - Filter flags actually constrain (e.g. `AnnualReview`).
@@ -166,9 +167,9 @@ If `change_applied: true` but triad fails → treat as not persisted; re-attempt
 
 ## Claude Design `/design-sync` import set
 
-When syncing a design system into Claude Design, import from this skill's `references/`:
+When syncing a design system into Claude Design, import from the `outsystems-design-to-app` skill's `references/`:
 
-- `references/outsystems-ui/ui-reference.md`, `styles-and-utilities.md`, `layouts.md`, `design-tokens.md`
+- `references/outsystems-ui/ui-reference.md`, `styles-and-utilities.md`, `layouts.md`
 - `references/screen-guides/design-system.md`
 - the theme-collision and reserved-class-name rules in Skill `outsystems-css-theming`
 

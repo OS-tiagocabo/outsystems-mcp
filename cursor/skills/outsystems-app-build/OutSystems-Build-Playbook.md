@@ -13,8 +13,9 @@
    sub-agent that re-loads the OML. Prefer to **resume the same session**
    (`mentor_session_id` + latest `mentor_session_token`) for follow-ups in the
    same turn/flow. Start a FRESH session only when (a) the OML may have diverged
-   (user published from ODC Studio in parallel), or (b) the previous session
-   errored/wedged. **Run-based surface only** — the session-based surface has no
+   (user published from ODC Studio in parallel), or (b) the error says the session
+   itself is gone. A failed or cancelled turn ends neither the session nor its state
+   (the main `outsystems` skill). **Run-based surface only** — the session-based surface has no
    `mentor_session_token`; see §1 *Which surface am I on?* for the branch.
 2. **One coherent change per mentor turn, but batch related sub-parts.** A single
    `mentor_start` can build several aggregates + widgets + wiring at once — it
@@ -283,20 +284,17 @@ mcp__preview__show_app {url}             -> open in canvas
   long wait either polls too early or sleeps past the finish. With 80–230 s
   sleeps, most runs turn out to be already done at the first poll, and the time
   in between is idle.
-- **Wait 15–30 s, then poll `mentor_get_run`; repeat until terminal.** The Bash
-  tool blocks a foreground `sleep N` (alone or chained) but allows an until-loop,
-  so wait with one:
-  `Bash(command:"end=$((SECONDS+20)); until [ $SECONDS -ge $end ]; do sleep 2; done")`.
-  Don't background a long `sleep` and then block on its output file: that waits
-  for the timer, not the run.
+- **Pace polls the way the main `outsystems` skill says:** at least ~30 s between
+  Mentor polls, waited in the background (or by the `outsystems:status-watcher` agent
+  on Claude Code), then end the turn.
 - **Respect `pollAfterMs` / `pollIntervalMs` as a floor, not a target.** The
   run-based surface returns `pollAfterMs`, the session-based surface
-  `pollIntervalMs`. Never poll sooner than it says, and never sooner than 15 s:
+  `pollIntervalMs`. Never poll sooner than it says, and never sooner than ~30 s:
   each poll is a model call that re-reads the whole conversation, so a 1 s loop
   burns calls without finishing the run faster.
 - **One wait, then ONE poll.** Don't spin: re-polling before the wait elapses
   returns nothing new and costs a call.
-- **Publishes work the same way:** wait 15–30 s between publish-status checks.
+- **Publish-status checks** wait 5–15 s, as the main skill says.
 
 ### Honest-completion signals (run-based surface; check on terminal success)
 - `attempted_change:true` + `change_applied:true` = a model edit actually landed.
@@ -333,9 +331,10 @@ mcp__preview__show_app {url}             -> open in canvas
   on `app_info`, or by checking the actual inventory/behavior changed.
 - On publish failure: `publish_logs {publication_id}` for the error code.
 - **Two-editor collision:** if the user edits/publishes from ODC Studio while you
-  hold a mentor session, your session's OML is now stale. Publishing from it will
-  **clobber** their changes. Start a FRESH session (loads current tenant state)
-  before editing again.
+  hold a mentor session, your session's OML is now stale. A publish turn reconciles
+  it: Mentor merges changes that don't overlap and reports a conflict when they do
+  (the main `outsystems` skill). Reload the published revision only when the user
+  asks.
 - **A library must be RELEASED before it can be located.** A newly created (or
   updated) **library** is NOT discoverable — not by a consumer's dependency picker,
   not via `app_list` / `context_*` / public-element search — until a version of it
@@ -1167,9 +1166,9 @@ entity per mentor turn** (§0) — each its own plan item.
 
 ### Session-token expiry mid-flow (no self-service re-auth here)
 - The OutSystems MCP token can expire mid-conversation — every call returns
-  **"MCP server 'outsystems' requires re-authorization (token expired)"**. This
-  deployment exposes **no `authenticate` tool** (the host manages OAuth from cached
-  creds), so this is a genuine **user-side** re-auth blocker. Write or update the
+  **"MCP server 'outsystems' requires re-authorization (token expired)"**. Re-authenticate
+  the way the main `outsystems` skill's Authenticating section says; only when the host
+  offers no way to sign in from the session is this a **user-side** blocker. Write or update the
   Implementation Report first (the sign-in-expiry rule in Skill `outsystems-app-generation`), then stop
   and say so.
 - A mentor run **keeps running server-side even if your turn ended / the token
