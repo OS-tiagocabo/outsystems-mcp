@@ -152,7 +152,7 @@ When building a design into a working app:
   in front of you is what matters; the mechanism is not.
 - **If a Figma design URL is provided**, invoke Skill **`ui-exactness`**
   (`skills/ui-exactness/` — the portable core, loaded by every host) and follow
-  **[ui-exactness](../../skills/ui-exactness/SKILL.md)**
+  **[UI-Exactness.md](../../skills/ui-exactness/UI-Exactness.md)**
   end-to-end: claim tables (design-pack or DesignBrief), one-shot Mentor
   protocol with literal `CLAIMS:`, OSUI ladder, viewport policy, claim verify.
   Do not approximate, invent widget trees, or run soft "closer to Figma" remolds.
