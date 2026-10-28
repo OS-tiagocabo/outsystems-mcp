@@ -5,7 +5,7 @@ description: >-
 
 license: MIT
 compatibility: Any Agent Skills host with OutSystems Mentor MCP, plus whatever design tooling the session has. No scripts — pure guidance.
-allowed-tools: Read Skill mcp__outsystems__mentor_start mcp__outsystems__mentor_get_run mcp__outsystems__publish_start mcp__outsystems__publish_status mcp__preview__set_viewport mcp__preview__get_screenshot mcp__preview__browser_snapshot mcp__outsystems__submit_feedback
+allowed-tools: Read Skill mcp__outsystems__mentor_start mcp__plugin_outsystems_outsystems__mentor_start mcp__outsystems__mentor_get_run mcp__plugin_outsystems_outsystems__mentor_get_run mcp__outsystems__publish_start mcp__plugin_outsystems_outsystems__publish_start mcp__outsystems__publish_status mcp__plugin_outsystems_outsystems__publish_status mcp__preview__set_viewport mcp__preview__get_screenshot mcp__preview__browser_snapshot mcp__outsystems__submit_feedback mcp__plugin_outsystems_outsystems__submit_feedback
 metadata:
   version: "2.0.0"
   author: outsystems-r-and-d

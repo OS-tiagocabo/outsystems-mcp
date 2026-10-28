@@ -5,7 +5,7 @@ description: >-
 
 license: MIT
 compatibility: Designed for Claude Code / Agent SDK driving OutSystems MCP mentor flow. No scripts — pure guidance.
-allowed-tools: Read Skill mcp__outsystems__context_screens mcp__outsystems__publish_status mcp__preview__get_screenshot
+allowed-tools: Read Skill mcp__outsystems__context_screens mcp__plugin_outsystems_outsystems__context_screens mcp__outsystems__publish_status mcp__plugin_outsystems_outsystems__publish_status mcp__preview__get_screenshot
 metadata:
   version: "1.0.0"
   author: outsystems-r-and-d
