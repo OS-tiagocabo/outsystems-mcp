@@ -1,0 +1,3 @@
+display_name: OutSystems UI Recipes (Beta)
+short_description: '[Beta] Add sorting, pagination, filters, i18n, wizards and more to a screen.'
+default_prompt: Use $outsystems-ui-recipes to add sorting and pagination to the table on my OutSystems screen.

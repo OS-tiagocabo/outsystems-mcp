@@ -1,0 +1,3 @@
+display_name: OutSystems Figma Design Source (Beta)
+short_description: '[Beta] Read tokens and geometry from a Figma URL, or author designs in Figma.'
+default_prompt: Use $outsystems-figma-design-source to read the tokens and layout from this Figma URL for my OutSystems app.

@@ -21,7 +21,7 @@ from it is repeated here — this wrapper only records what differs when you run
 Claude Code instead of inside the app-generator chat UI.
 
 Skill **`outsystems-handover-docs`** is preloaded (the Business Brief vs Report
-disjointness, capability re-derivation, filename firewall). Invoke `Skill(ui-exactness)`
+disjointness, capability re-derivation, filename firewall). Invoke `Skill(outsystems-ui-exactness)`
 before any "matches the design" claim — playbook rule 4 forbids the claim without its
 PASS tables.
 

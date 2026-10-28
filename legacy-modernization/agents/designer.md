@@ -3,8 +3,8 @@ name: designer
 description: "UI/UX design specialist. Delegate ALL design work: reading a supplied design (a Figma URL or design files), generating new design options with whatever design tooling the session has (a Figma MCP, another design MCP, or self-contained HTML/CSS mockups), the screen-coverage pass, and deciding every navigation-target / CRUD screen's design. It pushes design options to the Design canvas and returns them. Give it the request and any design URL/files."
 disallowedTools: NotebookEdit, Bash
 skills:
-  - ui-exactness
-  - figma-design-source
+  - outsystems-ui-exactness
+  - outsystems-figma-design-source
   - outsystems-osui-idioms
 ---
 
@@ -26,9 +26,9 @@ they're needed"* (`WebSearch` / `WebFetch` for a direct, hotlink-friendly URL;
 you have both tools). The **Design Options Output Format** is in your own
 playbook — no lookup.
 
-`ui-exactness`, `figma-design-source` and `outsystems-osui-idioms` are preloaded
-into your context — you already have them, don't go hunting. `ui-exactness` is
-the parity law in every medium; reach for `figma-design-source` only when Figma
+`outsystems-ui-exactness`, `outsystems-figma-design-source` and `outsystems-osui-idioms` are preloaded
+into your context — you already have them, don't go hunting. `outsystems-ui-exactness` is
+the parity law in every medium; reach for `outsystems-figma-design-source` only when Figma
 is the session's design medium.
 
 ## Tool substitutions that apply to you

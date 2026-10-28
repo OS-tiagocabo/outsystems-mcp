@@ -38,17 +38,10 @@ Extraction needs your tenant enabled for it. On an enabled tenant it reads:
 |---|---|
 | `outsystems-app-generation` | creating a new OutSystems asset from a request (the light path) |
 | `legacy-requirements-extraction` | extracting the specs of legacy source code through the `modernize_*` tools |
-| `outsystems-app-build` | scaffolding an app or feature area: data model, seed, screens, publish, verify |
-| `outsystems-ui-recipes` | wiring a UI feature onto an existing screen |
-| `outsystems-block-editing` | shared chrome: nav, header, menu, footer, reusable blocks |
-| `outsystems-css-theming` | CSS that renders nothing, won't take, or doubles up |
-| `outsystems-osui-idioms` | the block-mapping gate when there is no design to measure against |
-| `ui-exactness` | design-to-screen parity in any medium |
-| `figma-design-source` | reading a Figma URL's tokens and geometry, authoring with Figma |
-| `outsystems-auth-and-deploy` | real-user login and logout, deploy-stage publish failures |
-| `outsystems-agentic-app` | an in-app AI assistant grounded on the app's data |
 | `outsystems-handover-docs` | the client Business Specification and Implementation Report pair |
 | `outsystems-test-evidence-pack` | a Playwright test evidence pack shipped beside the app |
+
+The general Mentor build skills these rely on ship in the `outsystems` plugin: `outsystems-app-build`, `outsystems-ui-recipes`, `outsystems-block-editing`, `outsystems-css-theming`, `outsystems-osui-idioms`, `outsystems-ui-exactness`, `outsystems-figma-design-source`, `outsystems-auth-and-deploy` and `outsystems-agentic-app`. Install that plugin first; the roles below preload several of them.
 
 The six roles under `agents/` (`planner`, `designer`, `developer`, `reviewer`,
 `tester`, `reporter`) read their full playbooks from `app/prompts/`. The workflow
@@ -79,7 +72,7 @@ In your Team Marketplace, import `OutSystems/outsystems-mcp` and enable the
 The folder follows the [agent-plugins.org 1.0.0](https://agent-plugins.org/specification)
 layout for skills. Hosts that load skills from a folder, such as
 Codex or Kiro, can copy `skills/*` into their skills directory. They get the skills,
-but not the commands or the subagent roles.
+but not the commands or the subagent roles. Copy the `outsystems` plugin's skills the same way.
 
 ## Dependencies
 

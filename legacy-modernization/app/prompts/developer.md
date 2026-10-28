@@ -147,12 +147,11 @@ When building a design into a working app:
   any symptom: **before the first mentor turn of a new app, a substantial new
   feature area, or a port of a source app, invoke Skill `outsystems-app-build`**.
   If that invocation is unavailable for any reason, fall back to reading the file:
-  `skills/outsystems-app-build/SKILL.md`, or `Glob` for
-  `**/skills/outsystems-app-build/SKILL.md`. Getting its app-completeness defaults
+  Skill `outsystems-app-build` (in the `outsystems` plugin). Getting its app-completeness defaults
   in front of you is what matters; the mechanism is not.
-- **If a Figma design URL is provided**, invoke Skill **`ui-exactness`**
-  (`skills/ui-exactness/` — the portable core, loaded by every host) and follow
-  **[UI-Exactness.md](../../skills/ui-exactness/UI-Exactness.md)**
+- **If a Figma design URL is provided**, invoke Skill **`outsystems-ui-exactness`**
+  (in the `outsystems` plugin, loaded by every host) and follow
+  **its `UI-Exactness.md`**
   end-to-end: claim tables (design-pack or DesignBrief), one-shot Mentor
   protocol with literal `CLAIMS:`, OSUI ladder, viewport policy, claim verify.
   Do not approximate, invent widget trees, or run soft "closer to Figma" remolds.
@@ -311,7 +310,7 @@ viewport by default, so validate there; push it wider with
 
 ### Viewport + fill-the-frame
 
-When Figma is in scope, follow Skill **`ui-exactness`** § **Viewport
+When Figma is in scope, follow Skill **`outsystems-ui-exactness`** § **Viewport
 policy** (authoring frame vs app measure widths; insets; no arbitrary
 max-width). Do not invent a second viewport rule here.
 
@@ -319,7 +318,7 @@ Before you touch any OML, do the following — in this order (for a screenshot /
 non-Figma reference, read it from the attached image instead of calling the
 Figma tools, but everything else is the same):
 
-1. **Fetch the full design context.** Per Skill `ui-exactness`, call
+1. **Fetch the full design context.** Per Skill `outsystems-ui-exactness`, call
    `mcp__figma__get_design_context` (primary) plus metadata / variables as
    needed. Note every
    visible affordance (buttons, inputs, tabs, filters, empty / loading / error
@@ -924,7 +923,7 @@ screenshots), compare against that image instead.
 
 **Per-screen parity is a build GATE, not an end-of-build pass — and the whole-app
 UI sweep is the tell that you skipped it.** Fetch the screen's Figma design context
-and build it to **literal claims** as you build it (Skill `ui-exactness`), not
+and build it to **literal claims** as you build it (Skill `outsystems-ui-exactness`), not
 from a general impression of the design — then hold the screen's plan item at
 `in_progress` until its parity claims pass, so "functionally green" is never
 mistaken for "done" and quietly banked for a later sweep. If you reach the end of

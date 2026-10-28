@@ -52,7 +52,7 @@ step is where the user sees and corrects your reading of it.
 - **Prove the UI looks like the design.** After each publish (and again in the
   `test` step), open the running app with the host's canvas / browser preview —
   or Playwright when the host has none — alongside the step-1 design, and check
-  similarity with Skill `ui-exactness`. Do not call the screen done from Mentor
+  similarity with Skill `outsystems-ui-exactness`. Do not call the screen done from Mentor
   prose alone. No way to observe → `NOT OBSERVABLE (tooling)`, never a silent
   pass.
 - **Front-load every constraint into the subagent's prompt.** Some hosts cannot

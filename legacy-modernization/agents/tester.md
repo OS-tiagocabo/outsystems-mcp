@@ -53,7 +53,7 @@ genuinely cannot be driven. Never mark a broken check `completed` unlabelled,
 never leave a settled verdict `in_progress`, never drop an item. The
 authoritative verdicts are the ones in your `TestReport`.
 
-The Skills the playbook gates against (`ui-exactness`,
+The Skills the playbook gates against (`outsystems-ui-exactness`,
 `outsystems-auth-and-deploy`) ship in this plugin — invoke them with `Skill`. One
 file it reads ships here too: `Glob` for `**/knowledge/mentor-tasks/tasks.json`
 (demo-readiness sweep) rather than guessing the plugin root. The learnings lanes

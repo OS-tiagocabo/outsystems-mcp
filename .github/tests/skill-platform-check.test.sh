@@ -30,12 +30,21 @@ MAIN_DESCRIBED=(
 )
 
 BETA_DESCRIBED=(
+  claude/skills/outsystems-agentic-app/SKILL.md
   claude/skills/outsystems-app-architecture/SKILL.md
+  claude/skills/outsystems-app-build/SKILL.md
+  claude/skills/outsystems-auth-and-deploy/SKILL.md
+  claude/skills/outsystems-block-editing/SKILL.md
+  claude/skills/outsystems-css-theming/SKILL.md
   claude/skills/outsystems-custom-code/SKILL.md
   claude/skills/outsystems-dependency-impact/SKILL.md
   claude/skills/outsystems-design-to-app/SKILL.md
+  claude/skills/outsystems-figma-design-source/SKILL.md
+  claude/skills/outsystems-osui-idioms/SKILL.md
   claude/skills/outsystems-spec-driven-build/SKILL.md
   claude/skills/outsystems-tenant-architecture/SKILL.md
+  claude/skills/outsystems-ui-exactness/SKILL.md
+  claude/skills/outsystems-ui-recipes/SKILL.md
 )
 
 first_rule_hash=""

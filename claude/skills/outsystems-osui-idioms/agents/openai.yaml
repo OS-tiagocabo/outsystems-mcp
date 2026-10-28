@@ -1,0 +1,3 @@
+display_name: OutSystems OSUI Idioms (Beta)
+short_description: '[Beta] Map every visual to a real OutSystems UI block before building screens.'
+default_prompt: Use $outsystems-osui-idioms to check that my OutSystems screens use real OutSystems UI blocks.

@@ -32,7 +32,7 @@ The playbook names in-process `mcp__…` servers that exist only inside the chat
 | `mcp__plan__update_plan` | the native **`TodoWrite`** tool (see below). |
 
 The Skills the playbook invokes all ship in this plugin — call them with `Skill`,
-unchanged: `ui-exactness`, `outsystems-osui-idioms`, `outsystems-css-theming`,
+unchanged: `outsystems-ui-exactness`, `outsystems-osui-idioms`, `outsystems-css-theming`,
 `outsystems-block-editing`, `outsystems-auth-and-deploy`, `outsystems-handover-docs`.
 `outsystems-app-build` and `outsystems-ui-recipes` are already preloaded above.
 

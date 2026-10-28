@@ -176,7 +176,7 @@ Files tab, then stop.
   item is `done`, `failed` (attempted and did not pass — with the reason in its
   `description`), or honestly left `in_progress` / `todo` with the gap named.
 - **Design fidelity is part of "done", not a nice-to-have.** When a design was
-  chosen or pasted, invoke Skill **`ui-exactness`** and close claim tables
+  chosen or pasted, invoke Skill **`outsystems-ui-exactness`** and close claim tables
   before calling the build done. Functional PASS ≠ Exactness PASS. Do not invent
   a second fidelity checklist in chat.
 - **Never end a turn to "wait" for a background run.** This chat UI does not
@@ -244,8 +244,7 @@ what makes a long build followable.
 write the detailed plan yourself instead of delegating to the `planner` — which is
 allowed, and is the normal path for a small app — you are the one deciding what
 gets built, so the defaults are yours to include. `Read`
-`skills/outsystems-app-build/SKILL.md` (if that path does not resolve,
-`Glob` for `**/skills/outsystems-app-build/SKILL.md`) and put each of its
+Skill `outsystems-app-build` (it ships in the `outsystems` plugin) and put each of its
 app-completeness defaults in the plan as its own item: ER diagram, login/logout
 wired, seed data per entity, and the rest.
 They ship **whether or not the user asked** — "it wasn't in the request" is not a

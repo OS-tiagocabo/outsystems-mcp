@@ -125,7 +125,7 @@ never report PASS for behaviour you could not drive.
    first `browser_navigate`, and drives each item. You compute `pass_rate_pct` from its
    `TestReport` and record it in the checklist.
 3. **`design_qa`** — **read-only** design-artifact scoring: `Task` `reviewer` with the
-   claim tables + app URL, scoring via Skill **`ui-exactness`** (claim files are the
+   claim tables + app URL, scoring via Skill **`outsystems-ui-exactness`** (claim files are the
    source of truth; screenshots are evidence). In the code-mockup medium the chosen
    option's mockup files are the design artifact — derive the claims from them and score
    the built app against them the same way. You write `design-qa-report-rev-<rev>.md`
@@ -157,7 +157,7 @@ Two gates, **separate counters**, both re-running the same step. Full text:
 | Gate | After | Passes at | Re-runs | Max re-runs |
 |---|---|---|---|---|
 | Functional | `validator` | **≥95%** of the validator's combined checklist PASS | `agent` | **5** |
-| Design fidelity | `design_qa` | **≥95%** of built screens PASS `ui-exactness` claim scoring | `agent` | **5** |
+| Design fidelity | `design_qa` | **≥95%** of built screens PASS `outsystems-ui-exactness` claim scoring | `agent` | **5** |
 
 - Score by the file's verdict accounting — `PASS` only in the numerator, a `PARTIAL` is
   **never** rounded up, `NOT OBSERVABLE` leaves the denominator.

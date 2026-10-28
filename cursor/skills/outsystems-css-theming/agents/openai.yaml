@@ -1,0 +1,3 @@
+display_name: OutSystems CSS Theming (Beta)
+short_description: '[Beta] Fix CSS that does nothing, won't take, or doubles up.'
+default_prompt: Use $outsystems-css-theming to find out why my CSS change did nothing in my OutSystems app.

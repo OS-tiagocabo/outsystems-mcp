@@ -10,7 +10,7 @@
     {
       "name": "outsystems",
       "description": "Edit, publish, deploy, and search OutSystems apps, and manage external libraries, from your AI assistant. Connects to your own OutSystems tenant's MCP server over OAuth.",
-      "version": "1.10.0",
+      "version": "1.11.0",
       "author": {
         "name": "OutSystems AI Platform"
       },
@@ -18,8 +18,8 @@
     },
     {
       "name": "legacy-modernization",
-      "description": "Modernize legacy applications onto OutSystems, or build new ones, on a live ODC tenant: the end-to-end build playbook, OSUI/theming idioms, UI feature recipes, shared-block editing, design parity, in-app AI assistants, the auth/deploy failures that pass every visible validation, the migration close-out document pair, the /outsystems-app-generation light path, the /extract-requirements and /workflow-legacy-app pipelines, and the designer/developer/reviewer/tester roles.",
-      "version": "1.0.31",
+      "description": "Modernize legacy applications onto OutSystems on a live ODC tenant: extract the requirements from legacy sources (/extract-requirements), build and verify the replacement app (/workflow-legacy-app), the /outsystems-app-generation light path, the migration close-out documents, the test evidence pack, and the planner, designer, developer, reviewer, tester and reporter roles. Uses the outsystems plugin's MCP server and its Mentor build skills.",
+      "version": "1.1.0",
       "author": {
         "name": "OutSystems"
       },

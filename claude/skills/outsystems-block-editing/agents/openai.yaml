@@ -1,0 +1,3 @@
+display_name: OutSystems Block Editing (Beta)
+short_description: '[Beta] Edit an app's shared header, menu, footer and reusable blocks.'
+default_prompt: Use $outsystems-block-editing to restyle the top menu of my OutSystems app.

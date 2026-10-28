@@ -1,0 +1,3 @@
+display_name: OutSystems Auth And Deploy (Beta)
+short_description: '[Beta] Fix logins, logouts and deploy failures that pass every validation.'
+default_prompt: Use $outsystems-auth-and-deploy to find out why my OutSystems app's login rejects real users.

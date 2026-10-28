@@ -64,7 +64,7 @@ paths. Do not bolt a scoring loop onto this flow.
   sign-in, and mark what could not be re-checked. It is the one report written
   without being asked (see step 5). Then say how to sign in again, and that the
   run resumes from the last publish.
-- **Check the installed skills are current.** Plugin version of this copy: `1.0.31`.
+- **Check the installed skills are current.** Plugin version of this copy: `1.1.0`.
   Read the latest released version from the plugin's `.claude-plugin/plugin.json`:
   `gh api repos/OutSystems/outsystems-mcp/contents/legacy-modernization/.claude-plugin/plugin.json --jq .content | base64 --decode`,
   or, without `gh`, `curl -fsSL https://raw.githubusercontent.com/OutSystems/outsystems-mcp/main/legacy-modernization/.claude-plugin/plugin.json`.
@@ -115,8 +115,8 @@ paths. Do not bolt a scoring loop onto this flow.
 ## The five steps
 
 1. **`design`** — A **supplied design** (URL or files) is the source of truth:
-   extract it (Skill `figma-design-source` for Figma; the design-pack rules of
-   `ui-exactness` in any medium), cover every screen the request implies, and
+   extract it (Skill `outsystems-figma-design-source` for Figma; the design-pack rules of
+   `outsystems-ui-exactness` in any medium), cover every screen the request implies, and
    present the coverage. **No design supplied** → **ONE option** in the session's
    medium, covering every screen and navigation target the request implies (Skill
    `outsystems-osui-idioms` for widget choice). One light QA pass — screen
@@ -141,7 +141,7 @@ paths. Do not bolt a scoring loop onto this flow.
    call and keep it current.
 3. **`build`** — The Mentor flow with Skill `outsystems-app-build` (plus
    `outsystems-osui-idioms`, `outsystems-ui-recipes`, `outsystems-css-theming`,
-   and `ui-exactness` whenever a design is in scope). **First screen first** —
+   and `outsystems-ui-exactness` whenever a design is in scope). **First screen first** —
    the app, the one entity it reads, its seed rows, that screen, publish — then
    extend; that skill's rule 6 owns the rule and the reason. **One chunk → one
    publish → one drive-test, every time** — see "Chunk size" below. Defaults
@@ -170,7 +170,7 @@ paths. Do not bolt a scoring loop onto this flow.
       option or a supplied Figma/HTML mockup), open the **published URL side by
       side with that design** on the harness canvas or browser surface (or
       screenshot both via Playwright) and check layout, spacing, typography,
-      colour and key chrome against Skill `ui-exactness`. A look-alike from
+      colour and key chrome against Skill `outsystems-ui-exactness`. A look-alike from
       memory is not enough — the comparison must be observed. No browser surface
       and no Playwright → those checks are `NOT OBSERVABLE (tooling)`, never
       silently passed.
