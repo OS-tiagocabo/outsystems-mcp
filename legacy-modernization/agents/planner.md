@@ -11,6 +11,11 @@ disallowedTools: Bash, NotebookEdit
 the coverage matrix, the final completeness pass. Nothing here restates it; this
 file is only what changes outside the app-generator chat UI.
 
+If `${CLAUDE_PLUGIN_ROOT}` doesn't resolve (Cursor doesn't set it), `Glob` for
+`**/legacy-modernization/app/prompts/planner.md`: first in your cwd, then under the host's plugin
+directory (`~/.cursor/plugins`, `~/.claude/plugins`), since the plugin is usually
+installed outside your cwd. Read every plugin file named here under the root you find.
+
 ## Tool scope
 
 No `tools:` list, so you inherit the session's tools — including the user's own

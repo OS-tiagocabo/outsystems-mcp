@@ -14,6 +14,11 @@ verdict accounting all live there and are not restated here. This command carrie
 the delta for running **outside the app-generator chat UI**: no canvases, no in-process MCP
 servers, and the six roles as real Claude Code subagents.
 
+If `${CLAUDE_PLUGIN_ROOT}` doesn't resolve (Cursor doesn't set it), `Glob` for
+`**/legacy-modernization/app/lib/workflows.py`: first in your cwd, then under the host's plugin
+directory (`~/.cursor/plugins`, `~/.claude/plugins`), since the plugin is usually
+installed outside your cwd. Read every plugin file named here under the root you find.
+
 ## User input
 
 ```text
@@ -93,6 +98,13 @@ never report PASS for behaviour you could not drive.
   applied inline; if the browser MCP truly isn't registered, record
   `NOT OBSERVABLE (tooling)` honestly and tell the user the install line. Say
   in the reports which of the two it was.
+- **A subagent's completion message is a claim about its work, not evidence of
+  it.** Before you act on a `handoff`, list the files it says it produced and
+  confirm they exist at the paths given; for a scoring handoff (`reviewer`,
+  `tester`), check a sample of its verdicts against the thing it scored. A
+  handoff can read as successful while the files it names are missing or hold
+  less than it claims: a populated report, an existing file and a file holding
+  what was claimed are three different facts.
 
 `<rev>` in every filename is the app's current published revision number.
 

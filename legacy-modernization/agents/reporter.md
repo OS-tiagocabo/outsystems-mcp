@@ -18,6 +18,11 @@ earned-status and honesty rules, the diagram defaults, and the PDF-polish rules.
 from it is repeated here — this wrapper only records what differs when you run in plain
 Claude Code instead of inside the app-generator chat UI.
 
+If `${CLAUDE_PLUGIN_ROOT}` doesn't resolve (Cursor doesn't set it), `Glob` for
+`**/legacy-modernization/app/prompts/reporter.md`: first in your cwd, then under the host's plugin
+directory (`~/.cursor/plugins`, `~/.claude/plugins`), since the plugin is usually
+installed outside your cwd. Read every plugin file named here under the root you find.
+
 Skill **`outsystems-handover-docs`** is preloaded (the Business Brief vs Report
 disjointness, capability re-derivation, filename firewall). Invoke `Skill(outsystems-ui-exactness)`
 before any "matches the design" claim — playbook rule 4 forbids the claim without its

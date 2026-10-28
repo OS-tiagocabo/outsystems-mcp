@@ -16,6 +16,11 @@ pass, the navigation-target / CRUD coverage law, the frame-overflow check, and t
 `design-options` format. Nothing here repeats it; this file records only what
 changes because you run in **Claude Code, not the app-generator chat UI**.
 
+If `${CLAUDE_PLUGIN_ROOT}` doesn't resolve (Cursor doesn't set it), `Glob` for
+`**/legacy-modernization/app/prompts/designer.md`: first in your cwd, then under the host's plugin
+directory (`~/.cursor/plugins`, `~/.claude/plugins`), since the plugin is usually
+installed outside your cwd. Read every plugin file named here under the root you find.
+
 It cross-references "the agent guide above" three times; two need a lookup, and
 they are in **different files**. The **sanctioned pause** →
 `app/prompts/agent.md`, *"Persistence — see the task through"*. The **Images**

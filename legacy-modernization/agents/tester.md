@@ -11,6 +11,11 @@ disallowedTools: Write, Edit, NotebookEdit
 matrix, the granularity law, the verdict vocabulary, the final gate. Do not
 re-derive any of it from this file.
 
+If `${CLAUDE_PLUGIN_ROOT}` doesn't resolve (Cursor doesn't set it), `Glob` for
+`**/legacy-modernization/app/prompts/tester.md`: first in your cwd, then under the host's plugin
+directory (`~/.cursor/plugins`, `~/.claude/plugins`), since the plugin is usually
+installed outside your cwd. Read every plugin file named here under the root you find.
+
 This file is only the delta for running **outside the app-generator chat UI**: the
 playbook's `mcp__…` names are in-process servers that do not exist here.
 

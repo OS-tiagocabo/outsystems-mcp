@@ -16,6 +16,11 @@ net-reduction rule live there and are **not** restated here. This file carries o
 delta for running **outside the app-generator chat UI**: no canvases, no download endpoint, no PR tool,
 real Claude Code subagents.
 
+If `${CLAUDE_PLUGIN_ROOT}` doesn't resolve (Cursor doesn't set it), `Glob` for
+`**/legacy-modernization/app/lib/workflows.py`: first in your cwd, then under the host's plugin
+directory (`~/.cursor/plugins`, `~/.claude/plugins`), since the plugin is usually
+installed outside your cwd. Read every plugin file named here under the root you find.
+
 ## User input
 
 ```text

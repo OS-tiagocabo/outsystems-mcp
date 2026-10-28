@@ -36,9 +36,10 @@ before wiring one of these features.**
    names/types/expressions (scoped to ONE screen) finishes in minutes; the same
    feature left for Mentor to *discover* burned a ~30-min hung run. Paste the
    skeleton. If a run hangs at `applyModelApiCode` with an unchanging cursor,
-   `mentor_cancel` may also hang — send a smaller, more concrete turn on the same
-   session (the main `outsystems` skill: a failed or cancelled turn ends neither the
-   session nor its state).
+   cancel it and poll the cancel to terminal (it can sit in `cancelling` for minutes),
+   then send a smaller, more concrete turn on the same session (the main `outsystems`
+   skill: a session runs one turn at a time, and a failed or cancelled turn ends
+   neither the session nor its state).
 2. **OSUI `Wizard` is layout-only — it has NO active-step input.** Drive each
    `WizardItem.Status` (type `OutSystemsUI.Steps`) from your own `CurrentStep`
    integer; keep the step content in separate `Visible = CurrentStep=N` containers

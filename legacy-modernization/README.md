@@ -10,9 +10,9 @@ Plugin name: `legacy-modernization`. It ships in the `outsystems` marketplace ne
 to the `outsystems` plugin, and it depends on that plugin's MCP server: it ships
 no MCP server, tenant URL or token of its own.
 
-## Supported legacy stacks
+## Legacy stacks
 
-Extraction needs your tenant enabled for it. On an enabled tenant it reads:
+Extraction needs your tenant enabled for it. On an enabled tenant it currently reads:
 
 - Lotus Notes / Domino (`.dxl`)
 - Unisys AB Suite (`.pmodel` exports)

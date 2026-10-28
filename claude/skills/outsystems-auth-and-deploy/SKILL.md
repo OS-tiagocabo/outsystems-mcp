@@ -361,10 +361,11 @@ that held for **modest** turns — on a degraded backend a **large** first run s
 on a fresh `app_key` session too, so read turn **SIZE**, not session freshness, as
 the primary lever (see the turn-shrink bullet below).
 
-- Resume stalled past ~10 min at `applyModelApiCode` → fire `mentor_cancel` (don't
-  wait on it) and retry in the same session with a smaller turn, as the main
-  `outsystems` skill says. Open a fresh `app_key` session only when the error says the
-  session is gone.
+- Resume stalled past ~10 min at `applyModelApiCode` → cancel the run and poll the
+  cancel to terminal: a cancel still in progress isn't terminal, and a session runs one
+  turn at a time (the main `outsystems` skill). Then retry in the same session with a
+  smaller turn. If the cancel never reaches terminal, tell the user and open a new
+  session on the same `app_key`.
 - A transient `"agent serve error"` / `upstream_status: 500` is a **different**
   failure — a backend hiccup with no OML committed. Just resume with the refreshed
   token from the failed run's `error` and retry.

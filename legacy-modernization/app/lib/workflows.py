@@ -732,7 +732,7 @@ program with nothing skipped, so the spec is complete. When `analysis` is
 incomplete: say so plainly in the report and name the causes listed in
 `analysis_incomplete` (on the result when it carries them, otherwise in the
 published `manifest.json`).
-Supported stacks: Notes (.dxl), AB Suite (.pmodel exports), MS Access,
+Extraction currently reads these stacks: Notes (.dxl), AB Suite (.pmodel exports), MS Access,
 AS/400 (DDS, RPG and CL source), AS/400 with CA 2E / Synon model exports,
 COBOL, Java, .NET and Node.js.
 

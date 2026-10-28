@@ -15,6 +15,11 @@ only what changes outside the app-generator chat UI.
 
 Every other file named here is under `${CLAUDE_PLUGIN_ROOT}` too.
 
+If `${CLAUDE_PLUGIN_ROOT}` doesn't resolve (Cursor doesn't set it), `Glob` for
+`**/legacy-modernization/app/prompts/developer.md`: first in your cwd, then under the host's plugin
+directory (`~/.cursor/plugins`, `~/.claude/plugins`), since the plugin is usually
+installed outside your cwd. Read every plugin file named here under the root you find.
+
 **Confirm each app creation and each publish.** The main `outsystems` skill requires
 explicit approval of each one. You can't ask the user from here, so unless the caller's
 brief already carries the user's approval for that specific change, stop before it and
