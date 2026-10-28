@@ -121,7 +121,7 @@ completeness here.
 
 For **every** screen in the `DesignBrief` / design pack, score design parity
 **only** via Skill **`ui-exactness`**
-([UI-Exactness.md](../../skills/ui-exactness/UI-Exactness.md)):
+([ui-exactness](../../skills/ui-exactness/SKILL.md)):
 Gates + Component-detail checklist + Viewport policy. Claim tables are SOT;
 screenshots are evidence attachments only (no PNG↔PNG, no soft "looks close
 enough").

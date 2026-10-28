@@ -196,7 +196,7 @@ def _migration_nodes(source: str) -> list[dict]:
             "IS IN SCOPE, also invoke Skill `ui-exactness` before any Mentor "
             "UI / Theme turn: literal hex/px CLAIMS, design-pack or DesignBrief "
             "claim tables (same shape as "
-            "`skills/ui-exactness/design-pack-templates.md`), "
+            "`skills/ui-exactness/SKILL.md`), "
             "DOM-before-CSS on OSUI chrome, one publish then claim verify — "
             "no soft 'closer to Figma' remold loops. This step owns ALL the work: do your "
             "own smoke checks and fix everything you find BEFORE marking the "
@@ -375,7 +375,7 @@ def _migration_nodes(source: str) -> list[dict]:
             "Score how faithfully each built screen matches its Figma frame — "
             f"gate passes at ≥{DESIGN_PASS_THRESHOLD_PCT}% of screens PASS",
             "Design QA: READ-ONLY scorer for Skill `ui-exactness` "
-            "(`skills/ui-exactness/UI-Exactness.md`) — the single "
+            "(`skills/ui-exactness/SKILL.md`) — the single "
             "screen design-parity law. NEVER fixes, edits, or publishes; "
             "deviations are screen FAILs for the design-fidelity gate (fixes "
             "belong to the agent/developer re-run). Delegate to the reviewer "
