@@ -45,7 +45,8 @@ step is where the user sees and corrects your reading of it.
   `show_app` / `show_file` — remembering that a **running app is opened in a
   browser surface, never published as an artifact**.
 - **Chunk the build small and publish every chunk.** One chunk → one publish →
-  one drive-test, and hand the `developer` an explicit chunk list rather than
+  one drive-test, each publish confirmed with the user first (the main `outsystems`
+  skill), and hand the `developer` an explicit chunk list rather than
   "build the screens". If a delegated build is running too coarse, stop it: the
   last published revision is safe on the tenant, so re-dispatching smaller from
   verified state beats letting it finish.

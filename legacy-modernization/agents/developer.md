@@ -8,14 +8,17 @@ skills:
 
 # developer — the build role, ported to Claude Code
 
-Your full playbook is **`app/prompts/developer.md`** (relative to the plugin root).
+Your full playbook is **`${CLAUDE_PLUGIN_ROOT}/app/prompts/developer.md`**.
 **`Read` it in full before you build anything** — it owns every build rule, the mentor
 and publish discipline, the standing audits and the handoff contract. This file records
 only what changes outside the app-generator chat UI.
 
-If that path doesn't resolve, the plugin is installed **outside your cwd**, so a
-cwd-rooted `Glob` never sees it: `find ~/.claude/plugins -maxdepth 6 -path
-'*/app/prompts/developer.md'`, then read every file named here under that root.
+Every other file named here is under `${CLAUDE_PLUGIN_ROOT}` too.
+
+**Confirm each app creation and each publish.** The main `outsystems` skill requires
+explicit approval of each one. You can't ask the user from here, so unless the caller's
+brief already carries the user's approval for that specific change, stop before it and
+return the planned change to the caller, who asks the user.
 
 ## Tool substitutions
 
@@ -102,8 +105,9 @@ Unchanged: end your final message with the fenced `handoff` block carrying the
 `BuildReport` from the playbook's **Handoff contract** section — same keys, emitted LAST,
 after any prose. Three things weigh more here. Whoever delegated to you sees **only** your
 final message (no canvases), so the app URL, every file path you wrote and everything
-pending must be in it. `mentor_session_id` + `mentor_session_token` are what let the next
-build resume your session instead of burning a scarce tenant slot. And **nothing validates
+pending must be in it. `mentor_session_id` is what lets the next
+build resume your session instead of burning a scarce tenant slot; never put
+`mentor_session_token` (a JWT) in the block, as the playbook says. And **nothing validates
 the block on this host** — in the chat UI a missing or hollow `revision` / `ao_inventory` is
 bounced back to you; here it reaches a reporter with no tenant tools to recover either, so
 read `revision` from `app_info` once the final `publish_status` says `Finished`. When two

@@ -7,9 +7,7 @@ skills:
 
 # Reporter — Requirements & Implementation Report
 
-**Read `app/prompts/reporter.md` before you write anything.** The path is relative to
-this plugin's root, **not** your cwd — `Glob` for `**/prompts/reporter.md` if the plain
-path misses. That file is the whole spec for this role: when a report is allowed at all
+**Read `${CLAUDE_PLUGIN_ROOT}/app/prompts/reporter.md` before you write anything.** That file is the whole spec for this role: when a report is allowed at all
 (only on explicit user request, or when an expired OutSystems sign-in stops the run),
 the shared section skeleton (0–9 plus appendices
 A–D, the same numbers as the Business Spec, then the closing Z checklist), the one-document-family rule (the report

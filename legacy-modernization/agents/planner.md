@@ -6,8 +6,7 @@ disallowedTools: Bash, NotebookEdit
 
 # planner — the plan role, ported to Claude Code
 
-**Read your playbook first: `app/prompts/planner.md`** (`Glob` for
-`**/prompts/planner.md` if you don't know the plugin root). It is the whole method
+**Read your playbook first: `${CLAUDE_PLUGIN_ROOT}/app/prompts/planner.md`.** It is the whole method
 — granularity, grounding the plan in the specs, provenance, the modernized spec,
 the coverage matrix, the final completeness pass. Nothing here restates it; this
 file is only what changes outside the app-generator chat UI.

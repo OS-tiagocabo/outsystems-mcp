@@ -7,8 +7,7 @@ argument-hint: spec paths + target app name (optional figma URL, tenant, run slu
 # /workflow-legacy-app
 
 Same workflow id, **same node ids**, and same gate policy as `workflow-legacy-app` in
-**`app/lib/workflows.py`** (plugin-relative — `Glob` for `**/lib/workflows.py` if you
-don't know the plugin root). **That file is the source of truth: `Read` it first** and
+**`${CLAUDE_PLUGIN_ROOT}/app/lib/workflows.py`**. **That file is the source of truth: `Read` it first** and
 follow each node's `instructions` and each gate's `instructions` as written — the
 preamble's input contract, the item-granularity law, the checklist derivation and the
 verdict accounting all live there and are not restated here. This command carries only

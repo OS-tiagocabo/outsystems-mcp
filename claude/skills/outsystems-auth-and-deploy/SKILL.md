@@ -31,10 +31,15 @@ filtered export, the harness blind spot, and the mentor-stall workaround — is 
 
 1. **Real users are authenticated by the platform, not by your table.** A Login
    that only matches a seeded roster rejects every real tenant user. Call the
-   built-in **`(System) Login`** first; fall back to the custom lookup only on
-   `InvalidCredentials`; never gate sign-in on an app role. (This is for when the
-   user has **explicitly** asked for real sign-in — the build default is still
-   *wire auth, keep screens Anonymous, let the user activate*.)
+   built-in **`(System) Login`** first; never gate sign-in on an app role. A
+   roster lookup on `InvalidCredentials` is a demo fallback for while the screens
+   are still Anonymous: it creates no platform session, so remove it when
+   authentication is activated, and from then on `InvalidCredentials` is a failed
+   sign-in. (The build default is *wire auth, keep screens Anonymous, let the user
+   activate*. Before the first publish, tell the user the screens are open to
+   anyone with the URL. When the user asks for authentication, activating it means
+   enforcing the screens' roles and the server actions' checks, not only adding a
+   Login screen.)
 2. **Logout must end the PLATFORM session.** Clearing client vars and navigating
    to Login leaves a real ODC session alive — the user "logs out" and is still
    signed in. Call **`(System) Logout`** when `GetUserId() <> NullTextIdentifier()`,

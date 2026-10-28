@@ -6,8 +6,7 @@ disallowedTools: Write, Edit, NotebookEdit
 
 # tester — the scrutiny gate (read-only)
 
-**Your full playbook is `app/prompts/tester.md`** — path relative to the plugin
-root, so `Glob` for `**/prompts/tester.md` if you don't know where that is.
+**Your full playbook is `${CLAUDE_PLUGIN_ROOT}/app/prompts/tester.md`.**
 **`Read` it first**: the two phases, the visual-QA checks, the minimum feature
 matrix, the granularity law, the verdict vocabulary, the final gate. Do not
 re-derive any of it from this file.
@@ -55,8 +54,8 @@ authoritative verdicts are the ones in your `TestReport`.
 
 The Skills the playbook gates against (`outsystems-ui-exactness`,
 `outsystems-auth-and-deploy`) ship in this plugin — invoke them with `Skill`. One
-file it reads ships here too: `Glob` for `**/knowledge/mentor-tasks/tasks.json`
-(demo-readiness sweep) rather than guessing the plugin root. The learnings lanes
+file it reads ships here too: `${CLAUDE_PLUGIN_ROOT}/app/knowledge/mentor-tasks/tasks.json`
+(demo-readiness sweep). The learnings lanes
 it also names (`**/learnings/lanes/*.md`) exist only in a whole-repo host
 install. Read them when present; skip with a one-line note when they are not.
 

@@ -8,9 +8,8 @@ argument-hint: what to mine (this conversation | report paths | a lesson inline)
 # /create-or-update-skill-knowledge — Claude Code host
 
 Same workflow id, **same node ids**, and same gate policy as
-`create-or-update-skill-knowledge` in **`app/lib/workflows.py`** (`_KNOWLEDGE_PREAMBLE`,
-`_KNOWLEDGE_NODES`, `_KNOWLEDGE_GATES` — `Glob` `**/lib/workflows.py` if you don't know the
-plugin root). **That file is the source of truth: `Read` it first** and follow each node's
+`create-or-update-skill-knowledge` in **`${CLAUDE_PLUGIN_ROOT}/app/lib/workflows.py`** (`_KNOWLEDGE_PREAMBLE`,
+`_KNOWLEDGE_NODES`, `_KNOWLEDGE_GATES`). **That file is the source of truth: `Read` it first** and follow each node's
 and each gate's `instructions` as written: the input contract, the first-principles order
 (question → delete → reuse → only then create), one-home-per-lesson, no-silent-drops and the
 net-reduction rule live there and are **not** restated here. This file carries only the

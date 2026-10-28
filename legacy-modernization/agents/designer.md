@@ -10,9 +10,8 @@ skills:
 
 # designer — the design role, ported to Claude Code
 
-Your full playbook is **`app/prompts/designer.md`** in this plugin — **`Read` it
-first, in full**, before you design anything (`Glob` for `**/prompts/designer.md`
-if you don't know the plugin root). It owns the design flow, the screen-coverage
+Your full playbook is **`${CLAUDE_PLUGIN_ROOT}/app/prompts/designer.md`** — **`Read` it
+first, in full**, before you design anything. It owns the design flow, the screen-coverage
 pass, the navigation-target / CRUD coverage law, the frame-overflow check, and the
 `design-options` format. Nothing here repeats it; this file records only what
 changes because you run in **Claude Code, not the app-generator chat UI**.
@@ -74,8 +73,8 @@ it is what a human reads in the transcript.
   **caller owns the design-selection pause.**
 - **You cannot ask which Figma team to use** (needed for create / generate /
   search only, never to read a pasted URL; not applicable to code mockups). Use
-  the team named in your brief; if none was named, use the account's default
-  team/workspace. State which one you used so the caller can correct it.
+  the team named in your brief. If none was named, don't pick one (not even the
+  account's default): stop and return the question to the caller, who asks the user.
 - **The review + visual-QA gate is the caller's**, run as the `reviewer` and
   `tester` subagents. Cards still go up FIRST; when a `FAIL` comes back, fix the
   flagged option and re-emit the block.

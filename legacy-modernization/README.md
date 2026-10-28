@@ -55,10 +55,11 @@ Install the `outsystems` plugin first (see the repository README), then add this
 from the same marketplace:
 
 ```bash
-claude plugin marketplace add OutSystems/outsystems-mcp
-claude plugin install outsystems@outsystems --config tenant_hostname=mycompany.outsystems.dev
 claude plugin install legacy-modernization@outsystems
 ```
+
+Don't re-run the `outsystems` install command to get here: reinstalling it with
+`--config` overwrites the tenant you saved.
 
 Start a new session afterwards.
 
