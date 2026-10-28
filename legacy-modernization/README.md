@@ -77,7 +77,7 @@ In your Team Marketplace, import `OutSystems/outsystems-mcp` and enable the
 ### Other Agent Skills hosts
 
 The folder follows the [agent-plugins.org 1.0.0](https://agent-plugins.org/specification)
-layout (`plugin.json` plus `skills/`). Hosts that load skills from a folder, such as
+layout for skills. Hosts that load skills from a folder, such as
 Codex or Kiro, can copy `skills/*` into their skills directory. They get the skills,
 but not the commands or the subagent roles.
 
@@ -127,7 +127,7 @@ exit and start Claude Code again.
 | Cursor App | refresh the Team Marketplace import |
 | Folder copies (Codex, Kiro, others) | copy `skills/*` again from the new version |
 
-The skills check the latest released version in this folder's `plugin.json` and
+The skills check the latest released version in this folder's `.claude-plugin/plugin.json` and
 tell you once per run when your copy is older.
 
 ## Uninstall

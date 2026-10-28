@@ -50,9 +50,9 @@ step, so a skills-only install can still run the extraction.
   Never report an unauthenticated server as a missing feature, a disabled
   tenant or an outage, and never work around it.
 - **Check the installed skills are current.** Plugin version of this copy: `1.0.31`.
-  Read the latest released version from the repo's `plugin.json`:
-  `gh api repos/OutSystems/outsystems-mcp/contents/legacy-modernization/plugin.json --jq .content | base64 --decode`,
-  or, without `gh`, `curl -fsSL https://raw.githubusercontent.com/OutSystems/outsystems-mcp/main/legacy-modernization/plugin.json`.
+  Read the latest released version from the plugin's `.claude-plugin/plugin.json`:
+  `gh api repos/OutSystems/outsystems-mcp/contents/legacy-modernization/.claude-plugin/plugin.json --jq .content | base64 --decode`,
+  or, without `gh`, `curl -fsSL https://raw.githubusercontent.com/OutSystems/outsystems-mcp/main/legacy-modernization/.claude-plugin/plugin.json`.
   If its `version` is newer than this copy's, say so once, right after the authentication check:
   the version loaded, the version current, and how to update on this host. On
   Claude Code that is `claude plugin marketplace update outsystems`, then
