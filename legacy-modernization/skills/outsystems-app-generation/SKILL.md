@@ -64,7 +64,12 @@ paths. Do not bolt a scoring loop onto this flow.
   sign-in, and mark what could not be re-checked. It is the one report written
   without being asked (see step 5). Then say how to sign in again, and that the
   run resumes from the last publish.
-- **Check the installed skills are current.** Plugin version of this copy: `1.1.0`.
+- **Limited availability: check access first.** Legacy modernization isn't generally
+  available yet. Before anything else, sign in to the OutSystems MCP (see the plugin
+  README's [Authorize before you run](../../README.md#authorize-before-you-run)) and read
+  its tool list. If `modernize_session_start` isn't listed, tell the user, word for
+  word: *"Legacy modernization is in limited availability and isn't enabled for your tenant yet. Contact OutSystems if you'd like access."* Then stop.
+- **Check the installed skills are current.** Plugin version of this copy: `1.1.1`.
   Read the latest released version from the plugin's `.claude-plugin/plugin.json`:
   `gh api repos/OutSystems/outsystems-mcp/contents/legacy-modernization/.claude-plugin/plugin.json --jq .content | base64 --decode`,
   or, without `gh`, `curl -fsSL https://raw.githubusercontent.com/OutSystems/outsystems-mcp/main/legacy-modernization/.claude-plugin/plugin.json`.

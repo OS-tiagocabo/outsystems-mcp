@@ -19,6 +19,14 @@ If `${CLAUDE_PLUGIN_ROOT}` doesn't resolve (Cursor doesn't set it), `Glob` for
 directory (`~/.cursor/plugins`, `~/.claude/plugins`), since the plugin is usually
 installed outside your cwd. Read every plugin file named here under the root you find.
 
+## Limited availability
+
+**Limited availability: check access first.** Legacy modernization isn't generally
+available yet. Before anything else, sign in to the OutSystems MCP (see the plugin
+README's [Authorize before you run](../README.md#authorize-before-you-run)) and read
+its tool list. If `modernize_session_start` isn't listed, tell the user, word for
+word: *"Legacy modernization is in limited availability and isn't enabled for your tenant yet. Contact OutSystems if you'd like access."* Then stop.
+
 ## User input
 
 ```text

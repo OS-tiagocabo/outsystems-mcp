@@ -10,6 +10,13 @@ Plugin name: `legacy-modernization`. It ships in the `outsystems` marketplace ne
 to the `outsystems` plugin, and it depends on that plugin's MCP server: it ships
 no MCP server, tenant URL or token of its own.
 
+## Limited availability
+
+Legacy modernization is in limited availability until general availability. Access is
+per tenant: the `modernize_*` tools appear only on tenants that have it. Every command
+and skill in this plugin checks for them first, and on any other tenant the agent says
+"Legacy modernization is in limited availability and isn't enabled for your tenant yet. Contact OutSystems if you'd like access." and stops. To request access, contact your OutSystems team.
+
 ## Legacy stacks
 
 Extraction needs your tenant enabled for it. On an enabled tenant it currently reads:
@@ -83,7 +90,7 @@ but not the commands or the subagent roles. Copy the `outsystems` plugin's skill
 | **Figma MCP** | reading pasted designs, generating design options in Figma | `https://mcp.figma.com/mcp`. Without it the design phase falls back to HTML/CSS mockups, with the same number of options |
 | **A way to drive a URL** | drive-testing the published app and taking screenshots | the host's own browser surface first. If the host has none, add the Playwright MCP (`npx @playwright/mcp@latest`, Node 18+). With no surface at all, checks are reported `NOT OBSERVABLE (tooling)`, never silently passed |
 | **PDF tooling** (optional) | rendering the handover reports to PDF | Playwright print-to-PDF, or `pandoc`. Without it, reports ship as markdown and say so |
-| **Legacy extraction** (`modernize_*` tools on the OutSystems MCP) | `/extract-requirements` | nothing to install: the tools appear once your tenant is enabled for extraction |
+| **Legacy extraction** (`modernize_*` tools on the OutSystems MCP) | `/extract-requirements` | nothing to install: the tools appear once your tenant has access (see Limited availability) |
 
 ### If OutSystems MCP is not installed
 
@@ -94,9 +101,8 @@ start a new session.
 
 If the `modernize_*` tools are missing, check sign-in first (see below). If you are
 signed in, in a session started after sign-in, and the tools are still missing, your
-tenant is not enabled for extraction yet: contact your OutSystems team. Meanwhile,
-`/extract-requirements` can take a spec collection you already have, or write a
-clearly labelled draft from the sources.
+tenant doesn't have access yet: legacy modernization is in limited availability, so
+contact OutSystems to request it.
 
 ### Authorize before you run
 

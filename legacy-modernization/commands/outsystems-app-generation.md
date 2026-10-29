@@ -22,6 +22,14 @@ optional design URL or design files, and a tenant hint. Missing app name → ask
 once. Missing everything else → design from the request as written; the design
 step is where the user sees and corrects your reading of it.
 
+## Limited availability
+
+**Limited availability: check access first.** Legacy modernization isn't generally
+available yet. Before anything else, sign in to the OutSystems MCP (see the plugin
+README's [Authorize before you run](../README.md#authorize-before-you-run)) and read
+its tool list. If `modernize_session_start` isn't listed, tell the user, word for
+word: *"Legacy modernization is in limited availability and isn't enabled for your tenant yet. Contact OutSystems if you'd like access."* Then stop.
+
 ## On this host
 
 - **Frontier model recommended.** If this session is not already on the
