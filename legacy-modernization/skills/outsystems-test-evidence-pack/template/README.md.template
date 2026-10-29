@@ -1,0 +1,92 @@
+# Test Evidence Pack: {{APP_NAME}}
+
+Re-runnable tests and evidence for the requirements of **{{APP_NAME}}**. The pack ships beside the app, not inside it, and runs against the deployed app without changing it.
+
+It has three parts:
+
+| Part | Where | What it's for |
+|---|---|---|
+| Playwright tests | `tests/` | One test per requirement or user-journey step, tagged with the requirement's id. Re-run them at any time, and keep them as the app's regression suite. |
+| Traceability matrix | `evidence/traceability-matrix.html` (also `.md`, `.csv`) | For each requirement: where it lives in the app, the tests that cover it, the result, and links to the evidence. |
+| HTML report | `evidence/html-report/` | A trace, screenshots and video for every test, so you can watch a requirement pass or fail without running anything. |
+
+The requirements are in `requirements/requirements.json`. Their ids are the ones the Business Specification and the Implementation Report use, so you can look any result up in either document.
+
+## Run it (macOS, Windows or Linux)
+
+You need Node.js 20.12 or later (LTS recommended). The commands are the same in Terminal, PowerShell and cmd.
+
+```
+npm ci
+npm run setup
+copy .env.example .env      # Windows (cmd)
+cp .env.example .env        # macOS / Linux / PowerShell
+npm test
+```
+
+`npm test` runs every test and then builds the matrix. Open `evidence/traceability-matrix.html` in a browser, then click any test to see its evidence. To browse the full report with traces, run:
+
+```
+npm run report
+```
+
+To run only some requirements:
+
+```
+npm run test:req -- {{EXAMPLE_ID}}
+```
+
+That writes its own report and matrix to `evidence/subset/`, listing only those requirements, and leaves the full run's results in `evidence/` as they were.
+
+On a corporate network, `npm run setup` downloads Chromium through the proxy. If it fails, set `HTTPS_PROXY` first.
+
+## Test another environment
+
+Change `APP_BASE_URL` in `.env` to the app's root URL in that environment, then run `npm test` again. The tests read data but don't change it, unless you set `ALLOW_WRITES=true`. Leave that off on any environment other people use.
+
+## Settings (`.env`)
+
+| Variable | Meaning |
+|---|---|
+| `APP_BASE_URL` | Root URL of the app. |
+| `APP_USER`, `APP_PASSWORD` | Optional user for the sign-in tests. Tests that need it are skipped, with the reason, when it's blank. |
+| `APP_USER_WITHOUT_ROLE`, `APP_PASSWORD_WITHOUT_ROLE` | Optional user without the app's privileged role, for the role-gate tests. |
+| `ALLOW_WRITES` | `true` runs tests that create or change data. |
+{{SAMPLE_ROWS}}
+
+## What data the tests expect
+
+{{SEED_DATA}}
+
+## How to read a result
+
+- **Pass**: every test for the requirement ran and passed.
+- **Pass (partial)**: what ran passed, but some tests were skipped, for example because they need a user or need writes enabled.
+- **Fail**: at least one test failed. The matrix shows the first line of the failure, and the report shows the full trace.
+- **Flaky**: a test failed and then passed when retried. It isn't a pass: the result depends on timing or on the machine, and `npm test` fails until it's fixed.
+- **Blocked**: the requirement can't be checked through the app's screens (for example a scheduled job), or every test for it was skipped. The matrix gives the reason.
+- **Not covered**: no test is tagged with the requirement yet.
+
+Tests check what the page shows and the data behind it (row counts, filter values, the contents of exported files), not how it looks pixel for pixel. Screenshots are attached as evidence, not used as pass/fail checks, because font rendering differs between operating systems.
+
+## Run it in CI
+
+`.github/workflows/evidence.yml` runs the pack on `windows-latest` and `macos-latest` GitHub Actions runners on every push to `main`, and on demand with a chosen app URL. Each run keeps its matrix and HTML report as a downloadable artifact for 30 days. Add `APP_USER` and `APP_PASSWORD` as repository secrets to run the sign-in tests there.
+
+## Adding a test
+
+Tag it with the requirement it proves, name its steps Given / When / Then, and the matrix picks it up:
+
+```ts
+test('an approver sees the orders waiting for them', { tag: req('{{EXAMPLE_ID}}') }, async ({ page }, testInfo) => {
+  await given('an approver opens the approvals list', async () => {
+    await open(page, '/Approvals');
+  });
+  await then('every order shown is waiting for approval', async () => {
+    expect(new Set(await columnValues(page, 'Status'))).toEqual(new Set(['Pending approval']));
+    await evidence(page, testInfo, 'approvals list');
+  });
+});
+```
+
+Keep commands in `package.json` or in Node scripts, not in shell scripts, so they work the same on every OS.

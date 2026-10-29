@@ -2,7 +2,8 @@
 `claude/skills/` is the source; the other two must be byte-identical copies,
 so a fix can never land on one harness only. To sync after an edit:
 
-    for s in tenant-architecture app-architecture dependency-impact design-to-app spec-driven-build custom-code; do
+    for s in tenant-architecture app-architecture dependency-impact design-to-app spec-driven-build custom-code \
+             agentic-app app-build auth-and-deploy block-editing css-theming figma-design-source osui-idioms ui-exactness ui-recipes; do
       for dst in cursor/skills kiro/outsystems/skills; do
         rm -rf "$dst/outsystems-$s" && cp -r "claude/skills/outsystems-$s" "$dst/"
       done
@@ -17,7 +18,16 @@ SOURCE = REPO / "claude" / "skills"
 COPIES = [REPO / "cursor" / "skills", REPO / "kiro" / "outsystems" / "skills"]
 SKILLS = ["outsystems-tenant-architecture", "outsystems-app-architecture",
           "outsystems-dependency-impact", "outsystems-design-to-app",
-          "outsystems-spec-driven-build", "outsystems-custom-code"]
+          "outsystems-spec-driven-build", "outsystems-custom-code",
+          "outsystems-agentic-app",
+          "outsystems-app-build",
+          "outsystems-auth-and-deploy",
+          "outsystems-block-editing",
+          "outsystems-css-theming",
+          "outsystems-figma-design-source",
+          "outsystems-osui-idioms",
+          "outsystems-ui-exactness",
+          "outsystems-ui-recipes"]
 
 
 def _files(root: pathlib.Path):

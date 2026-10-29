@@ -1,0 +1,50 @@
+name: Test evidence pack
+
+# Runs the pack on Windows and macOS, so the evidence holds on both, and keeps each OS's
+# matrix and HTML report as a downloadable artifact.
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: App URL to test
+        default: {{BASE_URL}}
+  push:
+    branches: [main]
+
+jobs:
+  evidence:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    env:
+      APP_BASE_URL: ${{ inputs.base_url || '{{BASE_URL}}' }}
+      ALLOW_WRITES: 'false'
+      APP_USER: ${{ secrets.APP_USER }}
+      APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
+{{SAMPLE_ENV}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run typecheck
+      # npm test runs the suite and then builds the traceability matrix, and exits with the suite's status.
+      - run: npm test
+      - name: Upload evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-${{ runner.os }}
+          # The HTML report already holds every trace, screenshot and video; evidence/artifacts duplicates them.
+          path: |
+            evidence/html-report/
+            evidence/traceability-matrix.*
+            evidence/summary.json
+            evidence/results.json
+          retention-days: 30

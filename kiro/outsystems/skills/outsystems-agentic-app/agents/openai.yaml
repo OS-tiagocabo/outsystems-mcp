@@ -1,0 +1,3 @@
+display_name: OutSystems Agentic App (Beta)
+short_description: '[Beta] Build or fix an in-app AI assistant grounded on the app's own data.'
+default_prompt: Use $outsystems-agentic-app to add an AI assistant to my OutSystems app that answers from its data and cites the records.

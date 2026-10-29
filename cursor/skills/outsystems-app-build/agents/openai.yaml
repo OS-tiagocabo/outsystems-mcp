@@ -1,0 +1,3 @@
+display_name: OutSystems App Build (Beta)
+short_description: '[Beta] Build an app end to end: data model, seed data, screens, publish, verify.'
+default_prompt: Use $outsystems-app-build to build the data model, sample data and screens of my OutSystems app.

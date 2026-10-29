@@ -1,0 +1,3 @@
+display_name: OutSystems UI Exactness (Beta)
+short_description: '[Beta] Match built screens to a design with literal claims and a verify loop.'
+default_prompt: Use $outsystems-ui-exactness to make my OutSystems screens match this design exactly.
